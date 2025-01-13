@@ -1,0 +1,85 @@
+# The version of the Docker Compose file format
+# '3.8' is used for modern Docker installations and supports the latest features
+version: '3.8'
+
+# 'services' defines the containers/applications that make up your project
+# Each service will run in its own container
+services:
+  # 'web_server' is the name of our first service
+  # This name is also used as:
+  # - The DNS hostname in the Docker network
+  # - The container name prefix (e.g., project_web_server_1)
+  # - Reference for dependencies between services
+  web_server:
+    # 'build' specifies that this image should be built from source
+    build: 
+      # 'context' specifies where to find the build files (Dockerfile)
+      # './' means the current directory
+      # './web_server' means look in the web_server directory
+      # '.' means the parent directory
+      context: ./web_server
+    
+    # 'ports' maps container ports to host ports
+    # Format is: "HOST_PORT:CONTAINER_PORT"
+    # Here, port 5000 inside container is accessible on host's port 5000
+    ports:
+      - "5000:5000"
+    
+    # 'networks' connects the container to specified networks
+    # Containers in the same network can communicate with each other
+    networks:
+      - app_network
+    
+    # 'healthcheck' defines how Docker should check if the container is healthy
+    healthcheck:
+      # 'test' is the command to run to check health
+      # Using curl to check if the web server responds
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      # How often to run the health check
+      interval: 30s
+      # How long to wait for the health check to respond
+      timeout: 10s
+      # How many retries before marking as unhealthy
+      retries: 5
+      # Give the app 10 seconds to start up
+      start_period: 10s
+
+  # 'client' is our second service
+  client:
+    build: 
+      context: ./web_client
+    
+    # 'depends_on' specifies that this service depends on other services
+    # It ensures proper startup order
+    depends_on:
+      # Wait for web_server to be healthy before starting
+      web_server:
+        # 'condition: service_healthy' means wait for the healthcheck to pass
+        # This ensures the web server is truly ready to accept requests
+        condition: service_healthy
+    
+    # Connect to the same network as web_server
+    networks:
+      - app_network
+
+# 'networks' defines the networks that containers can use to communicate
+networks:
+  # 'app_network' is our network name
+  app_network:
+    # 'bridge' is the default Docker network driver
+    # It provides isolation and allows containers to communicate
+    # Options are:
+    # - bridge: default, good for single host
+    # - host: uses host network directly
+    # - overlay: for multi-host networking
+    # - macvlan: assigns MAC address to container
+    # - none: no networking
+    driver: bridge
+
+# Additional options that could be added:
+# volumes:           # Define persistent data storage
+# environment:       # Set environment variables
+# restart: always    # Restart policy
+# deploy:           # Deployment configuration for Swarm
+# command:          # Override default command
+# entrypoint:       # Override default entrypoint
