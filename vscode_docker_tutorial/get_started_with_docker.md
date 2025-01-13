@@ -391,8 +391,8 @@ TBD
 
 
 # TODO
-* Finish Docker Compose section with a functional script
-* Make example files functional & work with each other at the end
+* Clean grammar
+* Comment and clean redis/flask code
 * Add SSH instructions VSCode
 * Add instructions to copy docker image over SSH to target
 https://stackoverflow.com/questions/23935141/how-to-copy-docker-images-from-one-host-to-another-without-using-a-repository
