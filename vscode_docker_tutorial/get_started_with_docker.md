@@ -228,8 +228,7 @@ In general, the building is non interactive so software you want to install with
 ######  Best Practices
 
 **General recommendation**
-* Keep it simple and lightweight as possible. Consider breaking projects with lots of dependencies into multiple smaller containers, if possible. Docker Compose and multi-stage builds let you control this easily. More on that below.
-* It is also preferable to use common base images across containers and use [.dockerignore](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/)
+* Keep it simple and lightweight as possible. Consider breaking projects with lots of dependencies into multiple smaller containers, if possible. Docker Compose and multi-stage builds let you control this easily. More on those below.
 * Consider pruning the final container to be used on target device of any tools and files you have needed for development (Development container vs Production container)
 
 **Use Specific Base Image Tags**
@@ -243,13 +242,14 @@ In general, the building is non interactive so software you want to install with
 
 * Combine related RUN commands with &&
 * Place rarely changing instructions first (Speeds up building because of docker caching)
-* Use .dockerignore for unnecessary files
+* Use [.dockerignore](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/) for unnecessary files
 
 
 **Cache Usage**
 
 * Copy requirements files before other files
 * Install dependencies before copying application code
+* Order your Dockerfile commands from least to most frequently changing. This speeds up building during development.
 
 
 [Multi-stage Builds](https://docs.docker.com/build/building/multi-stage/)
