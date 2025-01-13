@@ -24,10 +24,14 @@ My personal preference is using VSCode for all projects involving coding as it i
 Note that Docker Desktop runs its own Virtual Machine environment (Even on a linux installation) and causes
 more overhead. If you prefer a minimal, but more involved installation and upkeep you can
 install Docker Engine, Docker CLI and Docker Compose separately. This option is only available on Linux.
-
-More info can be found [here.](https://docs.docker.com/engine/)
-
 It's not really worth doing this unless you want to do something extremely computation heavy, so I recommend saving yourself the headache.
+
+If you need to develop for a resource-constrained target device like Raspberry Pi, I **DO** Recommend installing only the Docker Engine and Docker CLI on that device. 
+This gives you the ease-of-use and features of Desktop while developing, but removes the extra overhead on the target device where you only want to run the image.
+More on this in chapter 7.
+
+More info about Docker Engine can be found [here.](https://docs.docker.com/engine/)
+
 #### 1. Getting started
 
 Once you have both programs, open up VSCode and head to the extensions marketplace. 
@@ -223,12 +227,16 @@ In general, the building is non interactive so software you want to install with
 
 ######  Best Practices
 
+**General recommendation**
+* Keep it simple and lightweight as possible. Consider breaking projects with lots of dependencies into multiple smaller containers, if possible. Docker Compose and multi-stage builds let you control this easily. More on that below.
+* It is also preferable to use common base images across containers and use [.dockerignore](https://www.geeksforgeeks.org/how-to-use-a-dockerignore-file/)
+* Consider pruning the final container to be used on target device of any tools and files you have needed for development (Development container vs Production container)
+
 **Use Specific Base Image Tags**
 
 * Use specific versions instead of 'latest'
 * Ensures reproducible builds
 * Prefer using purpose-specific images, eg. python base image if you only need to run python instead of running an entire ubuntu instance
-* Keep it simple
 
 
 **Layer Optimization**
