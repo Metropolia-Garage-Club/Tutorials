@@ -1,0 +1,7 @@
+Use "Compose Up" On the dockerfile! It spins up two containers, one with a python client and one with an ubuntu based flask/redis server.
+
+You can access the the website on the host machine easily by right-clicking the running "webserver" container and choosing open in browser.
+
+You can also right click on the client container and choose "Open in shell". Then run "python web_client.py". 
+
+The two containers are communicating!
