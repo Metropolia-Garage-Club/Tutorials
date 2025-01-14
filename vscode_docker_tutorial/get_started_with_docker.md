@@ -26,7 +26,7 @@ more overhead. If you prefer a minimal, but more involved installation and upkee
 install Docker Engine and Docker Compose separately. This option is only available on Linux.
 It's not really worth doing this unless you want to do something extremely computation heavy, so I recommend saving yourself the headache.
 
-If you need to develop for a resource-constrained target device like Raspberry Pi, I **DO** Recommend installing only the Docker Engine on that device. 
+If you need to develop for a resource-constrained target device like Raspberry Pi, I **DO** Recommend installing only the Docker Engine and Docker Compose on that device. 
 This gives you the ease-of-use and features of Desktop while developing, but removes the extra overhead on the target device where you only want to run the image.
 More on this in chapter 8.
 
@@ -413,12 +413,12 @@ Settings -> System -> Secure Shell
 
 ##### Linux: 
 
-Install [Docker Engine](https://docs.docker.com/engine/install/) on the device. No need for Desktop or Compose. As said before, you simply want to run containers without VM overhead. You don't need to build them on the target.
+Install [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose plugin](https://docs.docker.com/compose/install/linux/) on the remote target device. As said before, you simply want to run containers without VM overhead. You don't need to build them on the target.
 
 ##### Nvidia Jetson:
 
 You don't need to install Docker Engine. It comes pre-installed with the Jetpack SDK.
-
+Check that you have Docker Compose, though.
 
 Then, follow [Linux post-installation instructions](https://docs.docker.com/engine/install/linux-postinstall/).
 While the Docker group is "unsecure", SSH becomes significantly harder if you can't run
@@ -574,6 +574,19 @@ docker save <image> | gzip | pv | ssh username@ip_adress docker load
 ```
 You can try changing "gzip" to "bzip2" or "xz" if you have a slow network.
 You can also remove the "pv" argument if you don't wish to see pipeviewer.
+
+If you want to use Docker-Compose, then you also need to copy the .yaml file. You can drag and drop it from local window to a folder or you can use Secury Copy to transfer it
+
+```Shell
+scp docker-compose.yaml user@host:/path/to/destination/
+```
+Afterwards, you can simply run "Compose up" on the file to spin up the container(s)!
+
+Here is a handy one-liner you can save, change to match your names or turn into a macro if you wish.
+```Shell
+docker save <image> | gzip | pv | ssh user@host docker load && scp docker-compose.yaml user@host:/path/to/destination/
+```
+
 
 Try moving one of the local containers to the remote device!
 
