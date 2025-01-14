@@ -338,7 +338,11 @@ It is useful to occasionally run
 ```
 docker system prune -f
 ```
-In the CMD line to clear the docker cache. More info on keeping [Docker clean](https://docs.docker.com/engine/manage-resources/pruning/).
+In the CMD line to clear the docker cache. 
+
+You can also find the small prune icon by hovering over the "Docker" and "Images" tab lines in VSCode. This way you can easily prune (remove) existing images from memory as well as cached containers.
+
+More info on keeping [Docker clean](https://docs.docker.com/engine/manage-resources/pruning/).
 
 #### 6. Qemu and Docker
 
