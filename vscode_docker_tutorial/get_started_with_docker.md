@@ -354,7 +354,7 @@ In the context of Docker, this allows you to develop and compile docker containe
 
 Qemu is available for [Windows, Linux and MacOS.](https://www.qemu.org/download/) 
 
-##### Qemu support is provided with docker desktop installation 
+#### Qemu support is provided with docker desktop installation! 
 ##### You should not need to do anything. However, if you want to test it:
 ```
 docker run --platform=linux/arm64/v8 --rm -t arm64v8/ubuntu uname -m
@@ -411,9 +411,21 @@ Settings -> System -> Secure Shell
 
 ###### Setup Docker for running containers:
 
+##### Linux: 
+
 Install [Docker Engine](https://docs.docker.com/engine/install/) on the device. No need for Desktop or Compose. As said before, you simply want to run containers without VM overhead. You don't need to build them on the target.
 
-Finally, you are ready to develop remotely!
+##### Nvidia Jetson:
+
+You don't need to install Docker Engine. It comes pre-installed with the Jetpack SDK.
+
+
+Then, follow [Linux post-installation instructions](https://docs.docker.com/engine/install/linux-postinstall/).
+While the Docker group is "unsecure", SSH becomes significantly harder if you can't run
+Docker commands remotely. Sudo has a tendency to throw errors. You do not need to add logging. 
+
+
+###### Basic SSH use in VSCode
 
 In Remote Explorer, you can see the "Remotes" Tab on the top-left.
 
@@ -424,19 +436,166 @@ The command you use to log in remotely to a computer via SSH is of the format:
 ```
 ssh username@ip_address
 ```
+Try connecting now! VSCode may open the connection in the current window, but upon connecting you can right click and choose "Connect in New Window".
 
-TODO:
+Your VSCode window is now slightly different. You are now in the "Coding environment" of the target machine.
 
-docker image copying
-SSH use in VSCODE.
+You can use the target's CMD with
+>Ctrl + J
+
+And all of the connected VSCode windows' context -dependent functions run automatically on the target.
+Now, to make things simpler you should head to the extensions marketplace in the remote VSCode window and download the Docker Extension there.
+
+The VSCode environment of the remote device is separate from your local VSCode installation.
+
+###### Allow Docker to interact with SSH
+
+While basic SSH access supports login credentials, Docker does not.
+Therefore, you must have a public/private access key pair set up.
+
+This can be done on your local machine.
+
+##### Linux:
+
+Ssh-agent is present by default. Simply do:
+```Shell
+ssh-keygen
+```
+Just press enter for default save location. You may add a passphrase if you want, but it's not required.
+
+You can verify the creation with:
+
+```Bash
+ssh-add -l
+```
+t should list one or more identities that look something like 2048 SHA256:abcdefghijk somethingsomething (RSA). If it does not list any identity, you will not be able to connect. Also, it needs to have the right identity. The Docker CLI working does not mean that the Explorer window will work.
+
+It is very easy to add this key to the remote linux device:
+
+```Shell
+ssh-copy-id username@ip_address
+```
+##### Windows 11:
+
+Open up *Powershell*. Write:
+
+```Powershell
+ssh-keygen
+```
+
+By default, the system will save the keys to [your home directory]/.ssh/id_rsa.
+
+SSH service is not enabled by default. Run these commands in Powershell:
+
+```Powershell
+# By default the ssh-agent service is disabled. Configure it to start automatically.
+# Make sure you're running as an Administrator.
+Get-Service ssh-agent | Set-Service -StartupType Automatic
+
+# Start the service
+Start-Service ssh-agent
+
+# This should return a status of Running
+Get-Service ssh-agent
+
+# Now load your key files into ssh-agent
+ssh-add $env:USERPROFILE\.ssh\id_rsa
+```
+
+Open your file explorer.  You can now navigate to the hidden “.ssh” directory in your home folder. 
+You should see two new files. The identification is saved in the id_rsa file and the public key is labeled id_rsa.pub. This is your SSH key pair. They are both saved in plain text.
+
+To  add this to the linux remote device, run:
+
+```
+type $env:USERPROFILE\.ssh\id_rsa.pub | ssh {IP-ADDRESS-HERE} "cat >> .ssh/authorized_keys"
+```
+
+Now, once the key is on the remote host, reset the SSH connection in VSCode if you still had it active.
+If the key pairing worked, you do not need to log in!
 
 
 
-# TODO
-* Clean grammar
-* Comment and clean redis/flask code
-* Add SSH instructions VSCode
-* Add instructions to copy docker image over SSH to target
-https://stackoverflow.com/questions/23935141/how-to-copy-docker-images-from-one-host-to-another-without-using-a-repository
+
+###### Docker context
+
+Docker uses a "context" which is essentially the "active environment". You may be familiar with this concept from python's venv or conda.
+
+You can check the available contexts by doing in CMD line: 
+```
+docker context list
+```
+
+Alternatively, in VSCode you can do:
+>Ctrl + Shift + P 
+
+and search "Docker Context". "Inspect" lets you see the available contexts and "Use" lets you change the context.
+
+###### Setting up remote context
+
+For easy use, you need to set the remote device's docker to have a local docker context.
+
+In your *Local* VSCode window, modify this line to fit your use:
+
+```
+docker context create <put_name_here> --docker "host=ssh://username@ip_address:port"
+```
+
+Always include the user name in the Docker endpoint address, even if it is the same as the local user name. If you omit the port, it defaults to 22.
+
+Now, in your local VSCode window, go to the Docker tab then do:
+>Docker Context: Use
+
+And choose the one you created for the remote device! If there are no errors, that means it is working! (Even if you can't see any containers yet).
+
+Note: While you may also do this via CMD line, you need to specifically do it from the VSCode command window for both Docker CLI (CMD line commands) and VSCode to change the context.
+
+###### Copying Docker images via SSH
+
+Now that everything has been setup, we can finally get to the point why I wrote this guide in the first place!
+
+You can copy built docker images over SSH easily.
+
+For linux, you might want to have the progress bar utility "Pipeviewer"
+```Shell
+sudo apt install pv
+```
+
+For windows, you need to install [Cygwin](https://cygwin.com/install.html)
+Optionally, you may also install the Cygwin [Pipeviewer extension](https://cygwin.com/packages/summary/pv.html)
+Alternatively, there may be other methods for easy transfer but they are outside the scope of this tutorial.
+
+**To copy a Docker image from local to remote, make sure you are in the local docker context!**
+
+Then, simply run in the command line window, adapting to your use:
+
+```Shell
+docker save <image> | gzip | pv | ssh username@ip_adress docker load
+```
+You can try changing "gzip" to "bzip2" or "xz" if you have a slow network.
+You can also remove the "pv" argument if you don't wish to see pipeviewer.
+
+Try moving one of the local containers to the remote device!
+
+The image should have appeared on the remote window's docker tab!
+
+Now, when you run the image in the remote window, you can see the container is active. 
+Now, you are able to use the active container like before inside VSCode! Simply Attach Shell or VScode to the active container.
+
+#### 9. Afterword
+
+This is a fairly basic look into Docker. There are a lot of things you may encounter about it. All the information on this document and more can be found by searching online.
+
+Hopefully this guide has been some use for you. If you have feedback you can tell me in person or preferably start a discussion on the tutorials -github page.
+
+You are also free to add things to this document, but I would appreciate if you don't expand the scope too much. You could also start a new .md file in the same folder on github.
+
+There are many things that could be built upon the knowledge foundation laid here.
+
+Some of my suggestions for the future, but i do recommend looking into these yourself also:
+
+* How to have container(s) start automatically on boot-up
+* Managing container volumes, disk space and resource use
+* Different ways to have multiple containers work together
 
 
