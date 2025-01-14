@@ -23,12 +23,12 @@ My personal preference is using VSCode for all projects involving coding as it i
 
 Note that Docker Desktop runs its own Virtual Machine environment (Even on a linux installation) and causes
 more overhead. If you prefer a minimal, but more involved installation and upkeep you can
-install Docker Engine, Docker CLI and Docker Compose separately. This option is only available on Linux.
+install Docker Engine and Docker Compose separately. This option is only available on Linux.
 It's not really worth doing this unless you want to do something extremely computation heavy, so I recommend saving yourself the headache.
 
-If you need to develop for a resource-constrained target device like Raspberry Pi, I **DO** Recommend installing only the Docker Engine and Docker CLI on that device. 
+If you need to develop for a resource-constrained target device like Raspberry Pi, I **DO** Recommend installing only the Docker Engine on that device. 
 This gives you the ease-of-use and features of Desktop while developing, but removes the extra overhead on the target device where you only want to run the image.
-More on this in chapter 7.
+More on this in chapter 8.
 
 More info about Docker Engine can be found [here.](https://docs.docker.com/engine/)
 
@@ -380,13 +380,51 @@ The code examples for Dockerfile and Docker Compose shown before are used in it 
 Simply run the compose file in VSCode. 
 
 
-That concludes it for using Docker in VSCode. In the next chapter, i will briefly go over on how to 
-set up SSH in VSCode and also how to use it to copy and run docker containers on the target machine easily.
+That concludes it for using Docker in VSCode. In the next chapter, i will briefly go over on how to set up SSH in VSCode and also how to use it to copy and run docker containers on the target machine easily.
 
 
 #### 8. SSH, VSCode and Docker
 
-TBD
+###### Pre-requisites
+* Make sure you have an [OpenSSH compatible client installed](https://code.visualstudio.com/docs/remote/troubleshooting#_installing-a-supported-ssh-client)
+* Head to the VSCode extensions marketplace and find and install "Remote-SSH Extension"
+
+You should see a new tab called "Remote Explorer". This is where you connect from to your target device. You need to make sure that the device you want to connect to has SSH enabled. 
+
+The assumption in this chapter is that your target device (Where you want to SSH to) is running an ARM -based microprocessor and an Ubuntu based OS. This will in all likelihood be by far the majority of your use cases.
+
+Check online for guide how to set up SSH Server on target device running another OS. Here is a link for instructions for [Windows](https://gist.github.com/teocci/5a96568ab9bf93a592d7a1a237ebb6ea).
+
+###### You need to set up the following things on the target device locally:
+
+The device needs to be on the same network as your PC. It should preferably have a static IP address set. VSCode will remember the connection and you can simply login again later by clicking on the device in the Remote Explorer.
+
+Later on you may look into setting up a VPN like Netbird to allow you to SSH even across the internet using custom DNS names!
+
+On a target device running Ubuntu, you must enable:
+
+Settings -> System -> Secure Shell
+
+###### Setup Docker for running containers:
+
+Install [Docker Engine](https://docs.docker.com/engine/install/) on the device. No need for Desktop or Compose. As said before, you simply want to run containers without VM overhead. You don't need to build them on the target.
+
+Finally, you are ready to develop remotely!
+
+In Remote Explorer, you can see the "Remotes" Tab on the top-left.
+
+If you right click on it, you can choose "New Remote". Alternatively, open the CMD line in VSCode with Ctrl+J.
+
+The command you use to log in remotely to a computer via SSH is of the format:
+
+```
+ssh username@ip_address
+```
+
+TODO:
+
+docker image copying
+SSH use in VSCODE.
 
 
 
