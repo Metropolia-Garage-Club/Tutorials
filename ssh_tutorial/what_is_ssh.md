@@ -57,6 +57,13 @@ Regardless whether the machine you want to connect to is a container running on 
 a Raspberry Pi running a server of some kind, perhaps it's a Jetson powering the robot you are developing, \
 in any case: you need a remote connection to it. 
 
+**Copying files from one machine to another** \
+Another useful feature of remote connection is the ability to copy over files from machine A (local) \
+to B (remote) or B to A. This is done using the *scp* command as follows: \
+`scp /path/to/file/on/machine/A <user>@<host>:/path/where/to/copy/to/on/machine/B`\
+Incase you want to go in the other direction (from remote to local), all you need to do is reverse the order, \
+in which machines A and B are given as arguments to the *scp* command.
+
 **Connecting to GitHub or another Git host** \
 If you've ever cloned a git repository you may have noticed that there is more than one way of cloning a repository. 
 
