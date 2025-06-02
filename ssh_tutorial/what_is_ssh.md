@@ -17,7 +17,7 @@ but the server might need to be manually enabled on the remote machine: to find 
 run `systemctl status sshd`, and in case it is not active, enable it with `systemctl enable sshd` \
 Rememeber to restart the *sshd* service after editing any of its config files. 
 
-A key can be generated with the following command: `ssh-keygen -t ed25519 -f [name_of_key_file]`. \
+A key can be generated with the following command: `ssh-keygen -t ed25519 -f /path/to/key/file`. \
 While the -f [name] is not needed, it can be useful to name keys for specific uscases i.e. scool, work, home. \
 The reason why you'd want to do this is, that if you use the same key for every remote device you connec to, \
 a potential attacker will only need to get you key from one source and be able to authenticate to any device \
@@ -87,4 +87,3 @@ or host config files in one, your options for getting the contents of that repos
 files over ssh, copying files from a USB Stick (meaning you have physical access to the host), or directly cloning the repository after \
 authentication to GitHub via either github-cli or VS Code. And the more actively you want to contribute to any project, the more annoying \
 the non-direct communication methods to GitHub become.
-
