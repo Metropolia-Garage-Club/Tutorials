@@ -1,79 +1,79 @@
 Rem This script installs useful software used in the AIoT Garage 
 Rem ### CAD ###
-winget install --id=KiCad.KiCad -e &&
-winget install --id=FreeCAD.FreeCAD -e &&
-winget install --id=GNU.Octave -e &&
+winget install --id=KiCad.KiCad -e --scope machine &&
+winget install --id=FreeCAD.FreeCAD -e --scope machine &&
+winget install --id=GNU.Octave -e --scope machine &&
 
 Rem ### 3D Printing 
-winget install --id=Prusa3D.PrusaSlicer -e && 
-Rem winget install --id=Mango3D.LycheeSlicer -e && 
-Rem winget install --id=SoftFever.OrcaSlicer -e &&
-Rem winget install --id=Ultimaker.Cura -e &&
+winget install --id=Prusa3D.PrusaSlicer -e --scope machine && 
+winget install --id=SoftFever.OrcaSlicer -e --scope machine &&
+Rem winget install --id=Mango3D.LycheeSlicer -e --scope machine && 
+Rem winget install --id=Ultimaker.Cura -e --scope machine &&
 
 Rem Currently not allowed in Metropolia Network!!
-Rem winget install --id=Bambulab.Bambustudio -e &&
+Rem winget install --id=Bambulab.Bambustudio -e --scope machine &&
 
 Rem Communication Software
-winget install --id=Zoom.Zoom -e &&
+winget install --id=Zoom.Zoom -e --scope machine &&
 
 Rem ### Media & Document Tools ###
-winget install --id=TheDocumentFoundation.LibreOffice -e &&
-winget install --id=Adobe.Acrobat.Reader.64-bit -e &&
-winget install --id=Audacity.Audacity -e &&
-winget install --id=GIMP.GIMP.3 -e &&
-winget install --id=OBSProject.OBSStudio -e &&
-winget install --id=VideoLAN.VLC -e &&
+winget install --id=TheDocumentFoundation.LibreOffice -e --scope machine &&
+winget install --id=Adobe.Acrobat.Reader.64-bit -e --scope machine &&
+winget install --id=Audacity.Audacity -e --scope machine &&
+winget install --id=GIMP.GIMP.3 -e --scope machine &&
+winget install --id=OBSProject.OBSStudio -e --scope machine &&
+winget install --id=VideoLAN.VLC -e --scope machine &&
 
 Rem ### DEV Tools ###
-winget install --id=Notepad++.Notepad++ -e &&
-winget install --id=Microsoft.VisualStudioCode -e && 
-winget install --id=ArduinoSA.IDE.stable -e &&
-winget install --id=Git.Git -e &&
-winget install --id=GitHub.cli -e &&
-winget install --id=GitHub.GitHubDesktop -e &&
-winget install --id=Google.CloudSDK -e &&
-winget install --id=Amazon.AWSCLI -e && 
-winget install --id=Hashicorp.Terraform -e &&
-winget install --id=Python.Python.3.12 -e &&
-winget install --id=Anaconda.Anaconda3 -e &&
-winget install --id=Anaconda.Miniconda3 -e && 
-winget install --id=Docker.DockerDesktop -e &&
-winget install --id=DEVCOM.Lua -e &&
+winget install --id=Notepad++.Notepad++ -e --scope machine &&
+winget install --id=Microsoft.VisualStudioCode -e --scope machine && 
+winget install --id=ArduinoSA.IDE.stable -e --scope machine &&
+winget install --id=Git.Git -e --scope machine &&
+winget install --id=GitHub.cli -e --scope machine &&
+winget install --id=GitHub.GitHubDesktop -e --scope machine &&
+winget install --id=Google.CloudSDK -e --scope machine &&
+winget install --id=Amazon.AWSCLI -e --scope machine && 
+winget install --id=Hashicorp.Terraform -e --scope machine &&
+winget install --id=Python.Python.3.12 -e --scope machine &&
+winget install --id=Anaconda.Anaconda3 -e --scope machine &&
+winget install --id=Anaconda.Miniconda3 -e --scope machine && 
+winget install --id=Docker.DockerDesktop -e --scope machine &&
+winget install --id=DEVCOM.Lua -e --scope machine &&
 
 Rem ## Disk Image Tools ##
-winget install --id=Rufus.Rufus -e &&
-winget install --id=RaspberryPiFoundation.RaspberryPiImager -e &&
+winget install --id=Rufus.Rufus -e --scope machine &&
+winget install --id=RaspberryPiFoundation.RaspberryPiImager -e --scope machine &&
 
 Rem ## Network and VM
-winget install --id=WireGuard.WireGuard -e &&
-winget install --id=Netbird.Netbird -e && 
-winget install --id=WiresharkFoundation.Wireshark -e &&
-winget install --id=Microsoft.WSL -e && 
-winget install --id=Bostrot.WSLManager -e &&
-winget install --id=Oracle.VirtualBox -e &&
+winget install --id=WireGuard.WireGuard -e --scope machine &&
+winget install --id=Netbird.Netbird -e --scope machine && 
+winget install --id=WiresharkFoundation.Wireshark -e --scope machine &&
+winget install --id=Microsoft.WSL -e --scope machine && 
+winget install --id=Bostrot.WSLManager -e --scope machine &&
+winget install --id=Oracle.VirtualBox -e --scope machine &&
 
 Rem ## Other Useful tools
-winget install --id=Mozilla.Firefox -e &&
-winget install --id=RARLab.WinRAR -e &&
-winget install --id=7zip.7zip -e &&
-winget install --id=KeePassXCTeam.KeePassXC -e &&
+Rem winget install --id=Mozilla.Firefox -e --scope machine &&
+winget install --id=RARLab.WinRAR -e --scope machine &&
+winget install --id=7zip.7zip -e --scope machine &&
+winget install --id=KeePassXCTeam.KeePassXC -e --scope machine &&
 
-winget install --id=Microsoft.PowerToys -e &&
-winget install --id=Henry++.ErrorLookup -e &&
+winget install --id=Microsoft.PowerToys -e --scope machine &&
+winget install --id=Henry++.ErrorLookup -e --scope machine &&
 
 Rem ### Benchark Tools ###
-Rem winget install --id=Maxon.CinebenchR23 -e &&
+Rem winget install --id=Maxon.CinebenchR23 -e --scope machine &&
 
 Rem ### Gaming related applications ###
-Rem winget install --id=GOG.Galaxy -e
-Rem winget install --id=Valve.Steam -e &&
-Rem winget install --id=Nvidia.GeForceNow -e &&
-Rem winget install --id=WhirlwindFX.SignalRgb -e &&
-Rem winget install --id=Wagnardsoft.DisplayDriverUninstaller -e &&
-Rem winget install --id=Guru3D.Afterburner -e &&
-Rem winget install --id=CPUID.HWMonitor -e && 
-Rem winget install --id=TechPowerUp.GPU-Z -e &&
-Rem winget install --id=CPUID.CPU-Z -e &&
-Rem winget install --id=Spotify.Spotify -e &&
-Rem winget install --id=REALiX.HWiNFO -e &&
-Rem winget install --id=Discord.Discord -e &&
+Rem winget install --id=GOG.Galaxy -e --scope machine &&
+Rem winget install --id=Valve.Steam -e --scope machine &&
+Rem winget install --id=Spotify.Spotify -e --scope machine &&
+Rem winget install --id=Discord.Discord -e --scope machine &&
+Rem winget install --id=Nvidia.GeForceNow -e --scope machine &&
+Rem winget install --id=WhirlwindFX.SignalRgb -e --scope machine &&
+Rem winget install --id=Wagnardsoft.DisplayDriverUninstaller -e --scope machine &&
+Rem winget install --id=Guru3D.Afterburner -e --scope machine &&
+Rem winget install --id=CPUID.HWMonitor -e --scope machine && 
+Rem winget install --id=REALiX.HWiNFO -e --scope machine &&
+Rem winget install --id=TechPowerUp.GPU-Z -e --scope machine &&
+Rem winget install --id=CPUID.CPU-Z -e --scope machine
