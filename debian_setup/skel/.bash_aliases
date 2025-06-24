@@ -47,5 +47,4 @@ alias cstar='"$EDITOR" "$HOME"/.config/starship.toml'
 alias cnano='sudo "$EDITOR" /etc/nanorc'
 alias cyazi='"$EDITOR" "$HOME"/.config/yazi/yazi.toml'
 alias cpacman='sudo "$EDITOR" /etc/pacman.conf'
-# alias capt='sudo "$EDITOR" /'
-
+alias sbash = 'source "$HOME"/.bashrc'

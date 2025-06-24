@@ -165,7 +165,7 @@ flatpak install com.obsproject.Studio -y  #Official obs pkg
 flatpak install com.github.tchx84.Flatseal -y #Flatpak pkg permissions manager
 flatpak install org.freecad.FreeCAD -y
 flatpak install eu.stethewwolf.gresistor -y #GUI for checking THT resistor colour codes
-flatpak install com.bambulab.BambuStudio -y
+# flatpak install com.bambulab.BambuStudio -y
 # flatpak install com.usebottles.bottles -y
 # flatpak install us.zoom.Zoom -y
 # flatpak install com.discordapp.Discord -y
