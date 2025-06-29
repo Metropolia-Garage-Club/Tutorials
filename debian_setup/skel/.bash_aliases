@@ -1,10 +1,11 @@
 #! /bin/bash
 
-alias ls='ls --color=auto'
-alias la='ls -a --color=auto'
-alias ll='ls -l --color=auto'
-alias du100m='du -h -t100M'
-alias du1g='du -h -t1G'
+alias ls='ls -F --color=auto'
+alias la='ls -alhF --color=auto'
+alias ll='ls -lhF --color=auto'
+alias du100m='du -hd1 -t100M'
+alias du1g='du -hd1 -t1G'
+alias apt='nala'
 
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -44,7 +45,8 @@ alias cbash='"$EDITOR" "$HOME"/.bashrc'
 alias cbash_a='"$EDITOR" "$HOME"/.bash_aliases'
 alias cfast='"$EDITOR" "$HOME"/.config/fastfetch/config.jsonc'
 alias cstar='"$EDITOR" "$HOME"/.config/starship.toml'
-alias cnano='sudo "$EDITOR" /etc/nanorc'
+alias csnano='sudo "$EDITOR" /etc/nanorc'
+alias cnano="$EDITOR" "$HOME/.config/nano/nanorc"
 alias cyazi='"$EDITOR" "$HOME"/.config/yazi/yazi.toml'
 alias cpacman='sudo "$EDITOR" /etc/pacman.conf'
 alias sbash = 'source "$HOME"/.bashrc'
