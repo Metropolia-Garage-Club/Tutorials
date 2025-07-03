@@ -15,8 +15,10 @@ if [ "$EUID" == 0 ]
     exit
 fi
 
-# source os-relese to get distro information
+# source os-release to get distro information
 source /etc/os-release
+PROCESSOR_ARCH=$(uname -m)
+
 # Checking Package Manager
 if command -v nala >/dev/null 2>&1
 then
@@ -52,7 +54,7 @@ case "$PKGER" in
     ;;
 esac
 
-# Start by installing package manager if needed
+# Start by installing system package manager if needed
 if [[ "$PKGER" != "pacman" && "$PKGER" != "nala" ]];
 then
     read -p "Do you want to use nala as Package Manager? [Y]/[n] " yn1
@@ -63,7 +65,11 @@ then
 esac
 fi
 
-
+get_github_latest_release_tag()
+{
+local repo_path="$1"
+curl -s "https://api.github.com/repos/$repo_path/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
 
 # resource monitors
 install_resource_monitors()
@@ -115,14 +121,22 @@ sudo $PKGER install flatpak -y
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
+# Snap
+# sudo $PKGER install snap -y
+
 # gnome-software && gnome-shell-extension-manager
-sudo $PKGER install gnome-software gnome-software-plugin-flatpak -y
-sudo $PGKER install gnome-shell-extension-manager -y
+if pgrep -x "gnome-shell" > /dev/null; then
+    sudo $PKGER install gnome-software gnome-software-plugin-flatpak -y
+    sudo $PGKER install gnome-shell-extension-manager -y
+fi
 
 # miniconda
-mkdir -p ~/miniconda3
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3
-bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+if ! command -v conda >/dev/null 2>&1; then
+    mkdir -p ~/miniconda3
+    wget -P ~/miniconda3 "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+fi
+
 # sudo $PKGER install npm -y
 # sudo $PKGER install cargo -y
 }
@@ -130,56 +144,95 @@ bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
 ## Dev Tools
 install_dev_tools()
 {
-CONTAINERS=1
+# add user to dialout group to be able to communicate with microcontrollers
+sudo usermod -aG dialout $USER
+
 sudo $PKGER install tealdeer -y; tldr --update
-sudo $PKGER install arduino -y
 sudo $PKGER install git -y
-# sudo $PKGER install docker-desktop -y
 sudo $PKGER install nvim -y
 sudo $PKGER install gh -y
-sudo $PKGER install github-desktop -y
+sudo $PKGER install jq -y
 sudo $PKGER install tesseract-ocr-eng tesseract-ocr-fin -y
 sudo $PKGER install nvidia-cuda-toolkit nvidia-cuda-samples -y
-# sudo $PKGER install opencv -y
+# sudo $PKGER install arduino -y
+# sudo $PKGER install github-desktop -y
+# sudo $PKGER install docker-desktop -y
+# sudo $PKGER install opencv -y  # Python package
 # sudo $PKGER install netbird -y
-# sudo $PKGER install qemu-full -y
 # sudo $PKGER install wine -y
+
+# Arduino IDE
+local repo_path="arduino/arduino-ide"
+ARDUINO_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
+ARDUINO_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ARDUINO_LATEST_TAG/arduino-ide_${ARDUINO_LATEST_TAG}_Linux_64bit.AppImage"
+
+if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
+    mkdir -p ~/AppImages
+    wget -O ~/AppImages/ $ARDUINO_DOWNLOAD_URL
+    chmod +x ~/AppImages/arduino-ide_*.AppImage
+fi
+# QEMU KVM
+# sudo $PKGER install qemu-full -y
+
+# VS Code
+if [[ $ID == "ubuntu" || $ID == "debian" || $ID == "linuxmint" || $ID == "pop" ]]; then
+    case "$PROCESSOR_ARCH" in
+        x86_64) wget -P ~/Downloads/ "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" \
+        $PKGER install ~/Downloads/vscode.deb
+        ;;
+        arm64) wget -P ~/Downloads/ "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64" \
+        $PKGER install ~/Downloads/vscode.deb
+        ;;
+        *) echo -e "$RED Unknown processor architecture"
+        ;;
+    esac
+fi
+
+}
+
+install_container_tools()
+{
+# Docker
+if ! command -v docker >/dev/null 2>&1; then
+    case "$ID" in
+        "arch") ;;
+
+        "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings \
+                sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+                sudo chmod a+r /etc/apt/keyrings/docker.asc \
+                echo \
+                  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+                  ${UBUNTU_CODENAME:-$VERSION_CODENAME} stable" | \
+                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
+                sudo $PKGER update
+                sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+            ;;
+
+        "debian") sudo install -m 0755 -d /etc/apt/keyrings \
+                sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+                sudo chmod a+r /etc/apt/keyrings/docker.asc \
+                echo \
+                  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+                  $VERSION_CODENAME stable" | \
+                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
+                sudo $PKGER update
+                sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+            ;;
+    esac
+fi
 
 # Kubernetes
 
 # Podman
-
-# Docker
-case "$ID" in
-    "arch") ;;
-    "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings \
-            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
-            sudo chmod a+r /etc/apt/keyrings/docker.asc \
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-              ${UBUNTU_CODENAME:-$VERSION_CODENAME} stable" | \
-              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-            sudo $PKGER update
-            sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-        ;;
-    "debian") sudo install -m 0755 -d /etc/apt/keyrings \
-            sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
-            sudo chmod a+r /etc/apt/keyrings/docker.asc \
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
-              $VERSION_CODENAME stable" | \
-              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-            sudo $PKGER update
-            sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-        ;;
-esac
-
+if ! command -v podman >/dev/null 2>&1; then
+    echo ""
+fi
 }
 
 ## Robot Simulation
 install_robot_simulation()
 {
-# TODO: Add install scripts for isaac-sim && -lab
+# TODO: Add install scripts for isaaclab, ros2 && unity
 # sudo $PKGER install ROS2 -y
 
 # isaacsim
@@ -214,9 +267,15 @@ case "$isaac_sim_version" in
 esac
 
 # IsaacLab
+if command -v nvcc >/dev/null 2>&1; then
+CUDA_VERSION=$(nvcc --version | grep -oP 'release \K[0-9]+\.[0-9]+')
+else
+    CUDA_VERSION=" "
+    echo -e "$RED Cuda not found!$NC"
+fi
 mkdir -p ~/IsaacLab
 
-
+# Unity
 # sudo $PKGER install unity -y
 # [drone_sim]
 return
@@ -226,7 +285,7 @@ return
 install_cad_software ()
 {
 flatpak install --from https://flathub.org/repo/appstream/org.kicad.KiCad.flatpakref -y
-# sudo $PKGER install kicad kicad-packages3d -y
+# sudo $PKGER install kicad kicad-packages3d -y     # version in ubuntu/debian repos is quite old
 sudo flatpak install --user org.freecad.FreeCAD -y #appimg or flatpak
 sudo $PKGER install octave -y
 # sudo $PKGER install blender -y
@@ -236,11 +295,14 @@ sudo $PKGER install octave -y
 ## 3D Printing
 install_3d_printing ()
 {
-ORCA_LATEST_TAG=$(curl -s https://api.github.com/repos/SoftFever/OrcaSlicer/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-ORCA_DOWNLOAD_URL="https://github.com/SoftFever/OrcaSlicer/releases/download/$ORCA_LATEST_TAG/OrcaSlicer_Linux_AppImage_$ORCA_LATEST_TAG.AppImage"
-mkdir -p ~/AppImages
-wget -P ~/AppImages/ "$ORCA_DOWNLOAD_URL"
-chmod +x ~/AppImages/OrcaSlicer_*.AppImage
+local repo_path="SoftFever/OrcaSlicer"
+ORCA_LATEST_TAG=$(get_github_latest_release_tag"$repo_path")
+ORCA_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ORCA_LATEST_TAG/OrcaSlicer_Linux_AppImage_$ORCA_LATEST_TAG.AppImage"
+if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
+    mkdir -p ~/AppImages
+    wget -P ~/AppImages/ "$ORCA_DOWNLOAD_URL"
+    chmod +x ~/AppImages/OrcaSlicer_*.AppImage
+fi
 # flatpak install --user io.mango3d.LycheeSlicer -y
 # flatpak install --user com.prusa3d.PrusaSlicer -y
 # flatpak install --user com.ultimaker.cura -y
@@ -276,9 +338,10 @@ install_snaps()
 {
 if command -v snap >/dev/null 2>&1
 then
-    sudo snap install --classic code
-    sudo snap install --classic google-cloud-cli
-    echo -e "$BLUE vs code $NC installed through $BLUE Snap $NC"
+#     sudo snap install --classic code
+#     sudo snap install --classic google-cloud-cli
+#     echo -e "$BLUE vs code $NC installed through $BLUE Snap $NC"
+    echo -e "$RED Are you sure you want to install $BLUE Snap packages? $NC"
 else
     echo -e "$BLUE Snap $RED not available, $NC skipping $BLUE Snap packages... $NC"
 fi
@@ -292,16 +355,17 @@ echo -e "\nAvailable package lists: $YELLOW
  1) Resource Monitors (nvtop, btop)
  2) Terminal Emulators (fish)
  3) File Managers ()
- 4) Document Viewers (gimp, )
- 5) Package Managers ()
- 6) Dev Tools ()
- 7) Robot Simulation $RED (WIP) $YELLOW
- 8) CAD (kicad, freecad, cura)
- 9) 3D Printing (OrcaSlicer, LycheeSlicer, PrusaSlicer, Cura, BambuStudio)
- 10) Flatpaks (OBS, FreeCAD, Flatseal, gResistor)
- 11) Snap packages (gcloud-cli, vscode)
- 12) System Utils (timeshift, libfuse2) \n $NC"
-read -p "Select what category of packages to install (0 - 12): " pkglist
+ 4) Document Viewers (gimp, libreoffice, VLC, audacity)
+ 5) Package Managers (flatpak, gnome-software, miniconda, gnome-shell-extension-manager)
+ 6) Dev Tools (tldr, git, gh, tesseract-ocr, terraform, nvim)
+ 7) Container Tools (Docker, Podman, Kubernetes)
+ 8) Robot Simulation (IsaacSim, IsaacLab, ROS2) $YELLOW
+ 9) CAD (kicad, freecad)
+ 10) 3D Printing (OrcaSlicer, LycheeSlicer, PrusaSlicer, Cura, BambuStudio)
+ 11) Flatpaks (OBS, Flatseal, gResistor)
+ 12) Snap packages (gcloud-cli, vscode)
+ 13) System Utils (timeshift, libfuse2) \n $NC"
+read -p "Select what category of packages to install (0 - 13): " pkglist
 
 ###############################
 # !! PKGS installation start !!
@@ -309,19 +373,20 @@ read -p "Select what category of packages to install (0 - 12): " pkglist
 case "$pkglist" in
     0 ) install_system_utils; install_resource_monitors; install_terminal_emulators; \
         install_file_managers; install_document_viewers; install_package_managers; \
-        install_dev_tools; install_robot_simulation; install_cad_software; install_3d_printing; \
-        install_flatpaks; install_snaps;;
+        install_dev_tools; install_container_tools; install_robot_simulation; \
+        install_cad_software; install_3d_printing; install_flatpaks; install_snaps;;
     1 ) install_resource_monitors ;;
     2 ) install_terminal_emulators ;;
     3 ) install_file_managers ;;
     4 ) install_document_viewers ;;
     5 ) install_package_managers ;;
     6 ) install_dev_tools ;;
-    7 ) install_robot_simulation ;;
-    8 ) install_cad_software ;;
-    9 ) install_3d_printing ;;
-    10 ) install_flatpaks ;;
-    11) install_snaps ;;
-    12) install_system_utils ;;
+    7 ) install_container_tools ;;
+    8 ) install_robot_simulation ;;
+    9 ) install_cad_software ;;
+    10 ) install_3d_printing ;;
+    11 ) install_flatpaks ;;
+    12) install_snaps ;;
+    13) install_system_utils ;;
     * ) echo -e "$RED Nothing to install... $NC"; exit 1;;
 esac
