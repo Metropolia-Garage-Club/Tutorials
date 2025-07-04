@@ -23,14 +23,18 @@ PROCESSOR_ARCH=$(uname -m)
 if command -v nala >/dev/null 2>&1
 then
     PKGER=nala
-    # echo "nala is a working command!"
-    # echo "you install packages using:" $PKGER
 
 elif command -v apt >/dev/null 2>&1
 then
     PKGER=apt
-    # echo "nala is not a command!"
-    # echo "you use " $PKGER " to install packages"
+
+elif command -v yay >/dev/null 2>&1
+then
+    PKGER=yay
+
+elif command -v paru >/dev/null 2>&1
+then
+    PKGER=paru
 
 elif command -v pacman >/dev/null 2>&1
 then
@@ -38,33 +42,114 @@ then
 
 else
     PKGER=" "
-    # echo "you seem to not be using a Debian based distro :/"
-    # echo "packages are installed with: " $PKGER
+    echo "you seem to not be using a Debian or Arch based distro :/"
+    #echo "packages are installed with: " $PKGER
+    exit 1
 fi
 
 case "$PKGER" in
     apt|nala) echo -e "Using a $BLUE Debian $NC based system with packager: " $BLUE $PKGER $NC
-    ;;
-    pacman) echo -e "$BLUE Arch $RED isn't supported as of yet $NC"
-            echo -e "You are using: " $BLUE $PKGER $NC
-            exit 1
-    ;;
+            # if apt is the current $PKGER, offer to switch to using nala
+            if [[ "$PKGER" == "apt" ]]; then
+                if command -v nala >/dev/null 2>&1; then
+                    read -p "Nala is available. Use nala instead of apt? [Y]/[n] " yn1
+                    case "$yn1" in
+                        [Yy]*) PKGER=nala ;;
+                        [Nn]*) ;;
+                        *) PKGER=nala ;;
+                    esac
+
+                fi
+
+                read -p "Do you want to use nala as the system Package Manager? [Y]/[n] " yn2
+                case "$yn2" in
+                    [Yy]*) sudo apt install nala; PKGER=nala ;;
+                    [Nn]*) ;;
+                    *) sudo apt install nala; PKGER=nala ;;
+                esac
+            fi
+            ;;
+
+    pacman|yay|paru) echo -e "Using an $BLUE Arch $NC based system with packager: " $BLUE $PKGER $NC
+            # if pacman is the current $PKGER, offer to switch to yay / paru (AUR Helper)
+            if [[ "$PKGER" == "pacman" ]]; then
+                if command -v yay >/dev/null 2>&1; then
+                    read -p "Yay is available. Use yay instead of pacman? [Y]/[n] " yn3
+                    case "$yn3" in
+                        [Yy]*) PKGER=yay ;;
+                        [Nn]*) ;;
+                        *) PKGER=yay ;;
+                    esac
+                elif command -v paru >/dev/null 2>&1; then
+                    read -p "Paru is available. Use paru instead of pacman? [Y]/[n] " yn4
+                    case "$yn4" in
+                        [Yy]*) PKGER=paru ;;
+                        [Nn]*) ;;
+                        *) PKGER=paru ;;
+                    esac
+                else
+                    # Neither yay nor paru available - offer to install yay, then offer paru
+                    read -p "Do you want to install yay (AUR helper) as system Package Manager? [Y]/[n] " yn5
+                    case "$yn5" in
+                        [Yy]*)
+                            # Install yay
+                            sudo pacman -S --needed git base-devel --noconfirm
+                            cd /tmp
+                            git clone https://aur.archlinux.org/yay.git
+                            cd yay
+                            makepkg -si --noconfirm
+                            cd
+                            PKGER=yay
+                            ;;
+
+                        [Nn]*)
+                            # User declined yay, offer paru
+                            read -p "Do you want to install paru (AUR helper) as system Package Manager instead? [Y]/[n] " yn6
+                            case "$yn6" in
+                                [Yy]*)
+                                    # Install paru
+                                    sudo pacman -S --needed git base-devel --noconfirm
+                                    cd /tmp
+                                    git clone https://aur.archlinux.org/paru.git
+                                    cd paru
+                                    makepkg -si --noconfirm
+                                    cd
+                                    PKGER=paru
+                                    ;;
+
+                                [Nn]*) echo -e "Continuing with pacman (some AUR packages may not be available)" ;;
+                                *)
+                                    # Default to installing paru
+                                    sudo pacman -S --needed git base-devel --noconfirm
+                                    cd /tmp
+                                    git clone https://aur.archlinux.org/paru.git
+                                    cd paru
+                                    makepkg -si --noconfirm
+                                    cd
+                                    PKGER=paru
+                                    ;;
+                        esac
+                        ;;
+                    *)
+                        # Default to installing yay
+                        sudo pacman -S --needed git base-devel --noconfirm
+                        cd /tmp
+                        git clone https://aur.archlinux.org/yay.git
+                        cd yay
+                        makepkg -si --noconfirm
+                        cd
+                        PKGER=yay
+                        ;;
+                    esac
+                fi
+            fi
+            ;;
     *) echo -e "$RED You are not using a supported package manager $NC"
-        exit 1
-    ;;
+        exit 1 ;;
 esac
 
-# Start by installing system package manager if needed
-if [[ "$PKGER" != "pacman" && "$PKGER" != "nala" ]];
-then
-    read -p "Do you want to use nala as Package Manager? [Y]/[n] " yn1
- case "$yn1" in
-    [Yy]* ) sudo apt install nala -y; PKGER=nala;;
-    [Nn]* ) ;;
-        * ) sudo apt install nala -y; PKGER=nala;;
-esac
-fi
-
+# function to find the latest version number of a GitHub release
+# example use: $repo_path=arduino/arduino-ide
 get_github_latest_release_tag()
 {
 local repo_path="$1"
@@ -127,7 +212,7 @@ flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/fl
 # gnome-software && gnome-shell-extension-manager
 if pgrep -x "gnome-shell" > /dev/null; then
     sudo $PKGER install gnome-software gnome-software-plugin-flatpak -y
-    sudo $PGKER install gnome-shell-extension-manager -y
+    sudo $PKGER install gnome-shell-extension-manager -y
 fi
 
 # miniconda
@@ -144,8 +229,12 @@ fi
 ## Dev Tools
 install_dev_tools()
 {
-# add user to dialout group to be able to communicate with microcontrollers
-sudo usermod -aG dialout $USER
+    # add user to dialout (debian) or uucp (arch) group to be able to communicate with microcontrollers
+if [[ "$ID" == "arch" ]]; then
+    sudo usermod -aG uucp $USER
+else
+    sudo usermod -aG dialout $USER
+fi
 
 sudo $PKGER install tealdeer -y; tldr --update
 sudo $PKGER install git -y
@@ -166,7 +255,7 @@ local repo_path="arduino/arduino-ide"
 ARDUINO_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
 ARDUINO_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ARDUINO_LATEST_TAG/arduino-ide_${ARDUINO_LATEST_TAG}_Linux_64bit.AppImage"
 
-if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
+if ! ls ~/AppImages/arduino-ide_*.AppImage 1>/dev/null 2>&1; then
     mkdir -p ~/AppImages
     wget -O ~/AppImages/ $ARDUINO_DOWNLOAD_URL
     chmod +x ~/AppImages/arduino-ide_*.AppImage
@@ -177,11 +266,11 @@ fi
 # VS Code
 if [[ $ID == "ubuntu" || $ID == "debian" || $ID == "linuxmint" || $ID == "pop" ]]; then
     case "$PROCESSOR_ARCH" in
-        x86_64) wget -P ~/Downloads/ "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64" \
-        $PKGER install ~/Downloads/vscode.deb
+        x86_64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64";
+        sudo $PKGER install ~/Downloads/vscode.deb
         ;;
-        arm64) wget -P ~/Downloads/ "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64" \
-        $PKGER install ~/Downloads/vscode.deb
+        arm64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64";
+        sudo $PKGER install ~/Downloads/vscode.deb
         ;;
         *) echo -e "$RED Unknown processor architecture"
         ;;
@@ -197,25 +286,25 @@ if ! command -v docker >/dev/null 2>&1; then
     case "$ID" in
         "arch") ;;
 
-        "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings \
-                sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
-                sudo chmod a+r /etc/apt/keyrings/docker.asc \
+        "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings && \
+                sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
+                sudo chmod a+r /etc/apt/keyrings/docker.asc && \
                 echo \
                   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
                   ${UBUNTU_CODENAME:-$VERSION_CODENAME} stable" | \
-                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-                sudo $PKGER update
+                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+                sudo $PKGER update && \
                 sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
             ;;
 
-        "debian") sudo install -m 0755 -d /etc/apt/keyrings \
-                sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
-                sudo chmod a+r /etc/apt/keyrings/docker.asc \
+        "debian") sudo install -m 0755 -d /etc/apt/keyrings && \
+                sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+                sudo chmod a+r /etc/apt/keyrings/docker.asc && \
                 echo \
                   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
                   $VERSION_CODENAME stable" | \
-                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-                sudo $PKGER update
+                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+                sudo $PKGER update && \
                 sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
             ;;
     esac
@@ -244,26 +333,29 @@ echo -e "\nAvailable IsaacSim versions are: $YELLOW
 1) 4.2
 2) 4.5
 3) 5.0 (in beta as of 7/2025) $NC"
-read -p "Select which version of IsaacSim to install (1 - 3): " isac_sim_version
+read -p "Select which version of IsaacSim to install (1 - 3): " isaac_sim_version
 
 mkdir -p ~/isaacsim
 cd ~/isaacsim
 
 case "$isaac_sim_version" in
-    1 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_2; \
-        unzip "~/isaacsim/isaac-sim-*.zip"; \
-        ./omni.isaac.sim.post.install.sh:; \
-        cd;;
+    1 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_2
+        unzip "~/isaacsim/isaac-sim-*.zip"
+        ./omni.isaac.sim.post.install.sh
+        cd
+        ;;
 
-    2 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_5; \
-        unzip "~/isaacsim/isaac-sim-*.zip"; \
-        ./post_install; \
-        cd;;
-    3 ) wget -P ~/isaacsim $ISAAC_SIM_DL_5_0; \
-        unzip "~/isaacsim/isaac-sim-*.zip"; \
-        ./post_install; \
-        cd;;
-    * ) echo -e "$RED Unknown IsaacSim version $isaac_sim_version"
+    2 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_5
+        unzip "~/isaacsim/isaac-sim-*.zip"
+        ./post_install
+        cd
+        ;;
+    3 ) wget -P ~/isaacsim $ISAAC_SIM_DL_5_0
+        unzip "~/isaacsim/isaac-sim-*.zip"
+        ./post_install
+        cd
+        ;;
+    * ) echo -e "$RED Unknown IsaacSim version $isaac_sim_version $NC"
 esac
 
 # IsaacLab
@@ -296,7 +388,7 @@ sudo $PKGER install octave -y
 install_3d_printing ()
 {
 local repo_path="SoftFever/OrcaSlicer"
-ORCA_LATEST_TAG=$(get_github_latest_release_tag"$repo_path")
+ORCA_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
 ORCA_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ORCA_LATEST_TAG/OrcaSlicer_Linux_AppImage_$ORCA_LATEST_TAG.AppImage"
 if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
     mkdir -p ~/AppImages
