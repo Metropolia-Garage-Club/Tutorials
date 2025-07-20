@@ -1,0 +1,17 @@
+## Garage sudoers config
+Defaults insults
+
+## User aliases
+User_Alias GARAGE = aiot-garage
+
+## Command aliases
+## Groups of commands. Often used to group related commands together.
+
+Cmnd_alias    PROCESS = /usr/bin/nice, /usr/bin/kill, /usr/bin/renice, \
+                        /usr/bin/pkill, /usr/bin/top
+
+Cmnd_alias    REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff, /sbin/shutdown
+
+Cmnd_alias    FILE_OP = /bin/vi, /bin/vim, /bin/nvim, /bin/nano
+
+Cmnd_alias    CONTAINERS = /bin/docker, /bin/podman, /bin/kubectl

@@ -6,6 +6,7 @@ vim.keymap.set("n", "<leader>tt", function() print("Leader works!") end)
 -- Custom settings and scripts
 require("aiot.settings")
 require("aiot.myscripts.keybinds")
+require("aiot.myscripts.functions")
 
 vim.g.codi_virtual_text_pos = "right"
 

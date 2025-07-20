@@ -313,11 +313,14 @@ fi
 # Kubernetes
 
 # Podman
-if ! command -v podman >/dev/null 2>&1; then
-    echo ""
+pod_install=true
+if $pod_install; then
+    if ! command -v podman >/dev/null 2>&1; then
+        sudo $PKGER install podman podman-compose -y
+    fi
+    }
 fi
 }
-
 ## Robot Simulation
 install_robot_simulation()
 {
@@ -446,10 +449,10 @@ echo -e "\nAvailable package lists: $YELLOW
  0) All
  1) Resource Monitors (nvtop, btop)
  2) Terminal Emulators (fish)
- 3) File Managers ()
+ 3) File Managers (yazi, dolphin, nautilus)
  4) Document Viewers (gimp, libreoffice, VLC, audacity)
  5) Package Managers (flatpak, gnome-software, miniconda, gnome-shell-extension-manager)
- 6) Dev Tools (tldr, git, gh, tesseract-ocr, terraform, nvim)
+ 6) Dev Tools (tldr, git, gh, tesseract-ocr, terraform, nvim, arduino-ide, vs-code)
  7) Container Tools (Docker, Podman, Kubernetes)
  8) Robot Simulation (IsaacSim, IsaacLab, ROS2) $YELLOW
  9) CAD (kicad, freecad)
