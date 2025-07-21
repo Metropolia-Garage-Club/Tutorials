@@ -12,6 +12,7 @@ Cmnd_alias    PROCESS = /usr/bin/nice, /usr/bin/kill, /usr/bin/renice, \
 
 Cmnd_alias    REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff, /sbin/shutdown
 
-Cmnd_alias    FILE_OP = /bin/vi, /bin/vim, /bin/nvim, /bin/nano
+Cmnd_alias    FILE_OP = /bin/vi, /bin/vim, /bin/nvim, /bin/nano, \
+                        /bin/cp, /bin/mv, /bin/
 
 Cmnd_alias    CONTAINERS = /bin/docker, /bin/podman, /bin/kubectl

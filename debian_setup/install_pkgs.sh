@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # Defining colour variables for colourful output
 NC='\033[0m'
