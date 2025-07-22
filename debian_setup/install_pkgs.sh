@@ -243,6 +243,7 @@ sudo $PKGER install gh -y
 sudo $PKGER install jq -y
 sudo $PKGER install tesseract-ocr-eng tesseract-ocr-fin -y
 sudo $PKGER install nvidia-cuda-toolkit nvidia-cuda-samples -y
+sudo $PKGER install fzf -y
 # sudo $PKGER install arduino -y
 # sudo $PKGER install github-desktop -y
 # sudo $PKGER install docker-desktop -y
