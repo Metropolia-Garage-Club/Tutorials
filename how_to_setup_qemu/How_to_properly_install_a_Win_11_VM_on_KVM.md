@@ -86,10 +86,10 @@ Start the Virtual Machine Manager application.
 Before you begin creating a Windows 11 guest virtual machine, you must first enable XML editing because you will need to add the Hyper-V XML component later in this section.
 
 Go to **Edit > Preferences** and **Enable XML editing**.
-![[win-kvm-images/02-install-windows-11-virtual-machine-on-kvm-enable-xml-editing.webp]]
+![enable-xml-editing](win-kvm-images/02-install-windows-11-virtual-machine-on-kvm-enable-xml-editing.webp)
 
 After that, click the computer icon in the upper left corner.
-![[win-kvm-images/03-install-windows-11-virtual-machine-on-kvm-start-wizard.webp]]
+![start-wizard](win-kvm-images/03-install-windows-11-virtual-machine-on-kvm-start-wizard.webp)
 
 This will launch a wizard that will guide you through the process of creating a new virtual machine in five easy steps.
 ### 1.1. Configure Default Virtual Hardware Using the Wizard
@@ -99,35 +99,35 @@ The Virtual Machine Manager wizard lets you quickly create a guest virtual machi
 **STEP 1: Choose how you would like to install the operating system.**
 
 As you are installing Windows 11 from an ISO image, choose the first option. Then click the Forward button.
-![[win-kvm-images/04-install-windows-11-virtual-machine-on-kvm-wizard-step1.webp]]
+![wizard-step1](win-kvm-images/04-install-windows-11-virtual-machine-on-kvm-wizard-step1.webp)
 
 **STEP 2: Choose ISO installation media.**
 
 Provide the location of the Windows 11 ISO installer image. Then click the Forward button.
-![[win-kvm-images/05-install-windows-11-virtual-machine-on-kvm-wizard-step2.webp]]
+![wizard-step2](win-kvm-images/05-install-windows-11-virtual-machine-on-kvm-wizard-step2.webp)
 
 **STEP 3: Choose Memory and CPU settings**.
 
 Set the amount of host memory and virtual CPUs that will be assigned to the guest virtual machine. I'll set the guest memory to 6 GiB and the virtual CPUs to 2. You can, however, change this based on your RAM and CPU availability. Click the Forward button to continue.
-![[win-kvm-images/06-install-windows-11-virtual-machine-on-kvm-wizard-step3.webp]]
+![wizard-step3](win-kvm-images/06-install-windows-11-virtual-machine-on-kvm-wizard-step3.webp)
 
 **STEP 4: Enable storage for this virtual machine.**
 
 Set the disk image size for the virtual machine. The disk image that is created will be of the type QCOW2, which is a copy-on-write format. The QCOW2's initial file size will be smaller, and it will only grow as more data is added. So I'll set the disk image size to 80 GiB, but you can change it to suit your needs. To install Windows 11, you need to have a disk space of 64 GiB or greater.
-![[win-kvm-images/07-install-windows-11-virtual-machine-on-kvm-wizard-step4.webp]]
+![wizard-step4](win-kvm-images/07-install-windows-11-virtual-machine-on-kvm-wizard-step4.webp)
 
 **STEP 5: Set the name of the virtual machine.**
 
 This is the final configuration screen of the Virtual Machine Creation Wizard. Give the guest virtual machine a name. I'll set it to 'Windows-11', but you can change it to anything you want.
 
 Also, ensure that the 'Customize configuration before install' checkbox is selected. Click the Finish button to finish the wizard and proceed to the advanced options.
-![[win-kvm-images/08-install-windows-11-virtual-machine-on-kvm-wizard-step5.webp]]
+![wizard-step5](win-kvm-images/08-install-windows-11-virtual-machine-on-kvm-wizard-step5.webp)
 
 You will now be in the advanced options window.
 ### 1.2. Configure Chipset and Firmware
 
 In the Overview section, make sure the chipset is set to Q35 and the firmware is set to UEFI.
-![[win-kvm-images/09-install-windows-11-virtual-machine-on-kvm-adv-chipset-firmware.webp]]
+![adv-chipset-firmware](win-kvm-images/09-install-windows-11-virtual-machine-on-kvm-adv-chipset-firmware.webp)
 
 The Q35 chipset natively supports PCIe and provides improved PCI-E pass-through support.
 
@@ -141,7 +141,7 @@ For more information, check out the pages 'Hyper-V Enlightenments' and 'Hypervis
 ```
 Click the XML tab and add or replace the highlighted XML in the <hyperv> and <timer> in <clock> sections.
 ```
-![[win-kvm-images/10-install-windows-11-virtual-machine-on-kvm-adv-hyperv.webp]]
+![adv-hyperv](win-kvm-images/10-install-windows-11-virtual-machine-on-kvm-adv-hyperv.webp)
 
     Note: If you have an AMD processor, you cannot use the 'hv-evmcs' feature. This VMCS feature is only available for Intel platforms.
 
@@ -181,7 +181,7 @@ The XML for the <timer> in the <clock> section is:
 ### 1.4. Enable CPU Host-Passthrough
 
 Select the CPUs section in the left panel. Ensure that host-passthrough is enabled.
-![[win-kvm-images/11-install-windows-11-virtual-machine-on-kvm-adv-cpu-host-passthrough.webp]]
+![adv-cpu-host-passthrough](win-kvm-images/11-install-windows-11-virtual-machine-on-kvm-adv-cpu-host-passthrough.webp)
 
 When the mode is set to host-passthrough, the host CPU's model and features are exactly passed on to the guest virtual machine. This causes the virtual machine to run close to the host's native speed. This is the recommended and default option as well.
 ### 1.5. Configure the Storage
@@ -193,7 +193,7 @@ Change the disk bus from SATA to VirtIO. VirtIO is preferred over other emulated
 Set the cache mode to none. In this mode, the host page cache is bypassed, and I/O occurs directly between the hypervisor user space buffers and the storage device. In terms of performance, it is equivalent to direct disk access on your host.
 
 Set the discard mode to unmap. When you delete files in the guest virtual machine, the changes are reflected immediately in the guest file system. The qcow2 disk image associated with the VM on the host, however, does not shrink to reflect the newly freed space. When you set the discard mode to unmap, the qcow2 disk image will automatically shrink to reflect the newly freed space.
-![[win-kvm-images/12-install-windows-11-virtual-machine-on-kvm-adv-storage.webp]]
+![adv-storage](win-kvm-images/12-install-windows-11-virtual-machine-on-kvm-adv-storage.webp)
 
 ### 1.6. Mount the VirtIO-Win.ISO Image
 
@@ -210,11 +210,11 @@ If you haven't already installed or downloaded virtio-win.iso, see the section t
 ### 1.7. Configure Virtual Network Interface
 
 In the NIC section, change the device model to virtio. The network VirtIO driver is specifically designed and optimized for virtualization. As a result, there will be no processing overhead, and the performance of the guest virtual machine will naturally improve.
-![[win-kvm-images/13-install-windows-11-virtual-machine-on-kvm-adv-CDROM-2.webp]]
+![adv-CDROM-2](win-kvm-images/13-install-windows-11-virtual-machine-on-kvm-adv-CDROM-2.webp)
 ## 1.8. Remove the USB Tablet Device
 
 In a Windows virtual machine, removing the USB tablet device can reduce idle CPU usage and context switches. As a result, the performance of the Windows 11 virtual machine will improve.
-![[win-kvm-images/14-install-windows-11-virtual-machine-on-kvm-adv-nic.webp]]
+![adv-nic](win-kvm-images/14-install-windows-11-virtual-machine-on-kvm-adv-nic.webp)
 
 ### 1.9. Add QEMU Guest Agent Channel
 
@@ -243,71 +243,71 @@ So, add a QEMU guest agent channel to the Windows 11 guest virtual machine.
 
 Click the Add Hardware button to open the Add New Virtual Hardware window, and select Channel. Then, from the drop-down list, select 'org.qemu.guest_agent.0' and click Finish to apply.
 
-![[win-kvm-images/16-install-windows-11-virtual-machine-on-kvm-adv-channel.webp]]
+![adv-channel](win-kvm-images/16-install-windows-11-virtual-machine-on-kvm-adv-channel.webp)
 ### 1.10. Enable Trusted Platform Module (TPM)
 
 Enable the Trusted Platform Module (TPM). TPM technology is designed to provide hardware-based, security-related functions. Windows 11 requires TPM version 2.0.
-![[win-kvm-images/17-install-windows-11-virtual-machine-on-kvm-adv-tpm.webp]]
+![adv-tpm](win-kvm-images/17-install-windows-11-virtual-machine-on-kvm-adv-tpm.webp)
 
 All of the virtual hardware and settings needed to install Microsoft Windows 11 have been configured. To begin the installation of Windows 11, click the 'Begin Installation' button in the upper left corner of the window.
-![[win-kvm-images/18-install-windows-11-virtual-machine-on-kvm-adv-begin-installation.webp]]
+![adv-begin-installation](win-kvm-images/18-install-windows-11-virtual-machine-on-kvm-adv-begin-installation.webp)
 ## 2. Install a Windows 11 Virtual Machine on KVM
 
 Now that you have finished configuring Windows 11 virtual hardware and have clicked the 'Begin Installation' button, the Windows 11 installation starts.
 
 On the screen that appears, choose your language, time and currency format, and keyboard from the list of available options. Then press the Next button.
-![[win-kvm-images/19-install-windows-11-virtual-machine-on-kvm-install-language.webp]]
+![install-language](win-kvm-images/19-install-windows-11-virtual-machine-on-kvm-install-language.webp)
 
 On the following screen, click Install Now. The Windows activation screen will appear. If you have a product key, enter it here. Otherwise, choose I don't have a product key.
-![[win-kvm-images/20-install-windows-11-virtual-machine-on-kvm-install-product-key.webp]]
+![](win-kvm-images/20-install-windows-11-virtual-machine-on-kvm-install-product-key.webp)
 
 Choose the Windows version you want to install. I'll be installing Windows 11 Home for this tutorial.
-![[win-kvm-images/21-install-windows-11-virtual-machine-on-kvm-install-win-home.webp]]
+![install-win-home](win-kvm-images/21-install-windows-11-virtual-machine-on-kvm-install-win-home.webp)
 
 When you get to the type of installation screen, choose Custom: Install Windows only (advanced).
-![[win-kvm-images/22-install-windows-11-virtual-machine-on-kvm-install-custom.webp]]
+![install-custom](win-kvm-images/22-install-windows-11-virtual-machine-on-kvm-install-custom.webp)
 
 You must now select the disk on which Windows 11 will be installed. However, as you can see, the installer was unable to find any drives.
-![[win-kvm-images/23-install-windows-11-virtual-machine-on-kvm-install-no-disk.webp]]
+![install-no-disk](win-kvm-images/23-install-windows-11-virtual-machine-on-kvm-install-no-disk.webp)
 
 This is because you selected the VirtIO disk bus when configuring Windows 11 virtual hardware. VirtIO devices are not natively recognized by Windows, so you must manually install the drivers.
 
 To install the VirtIO disk driver, click Load driver, then Browse, expand the CD Drive (E:), expand Viostor, expand w11, select amd64, and click OK.
-![[win-kvm-images/24-install-windows-11-virtual-machine-on-kvm-install-viostor.webp]]
+![install-viostor](win-kvm-images/24-install-windows-11-virtual-machine-on-kvm-install-viostor.webp)
 
 Click Next to install.
-![[win-kvm-images/25-install-windows-11-virtual-machine-on-kvm-install-viostor-driver.webp]]
+![install-viostor-driver](win-kvm-images/25-install-windows-11-virtual-machine-on-kvm-install-viostor-driver.webp)
 
 As you can see, the disk is now visible after installing the VirtIO storage driver.
-![[win-kvm-images/26-install-windows-11-virtual-machine-on-kvm-install-disk-80.webp]]
+![install-disk-80](win-kvm-images/26-install-windows-11-virtual-machine-on-kvm-install-disk-80.webp)
 
 But don't proceed with the installation just yet. You still need to install the VirtIO network driver.
 
 Repeat the procedure for the network device as well. Click Load driver again, then Browse, expand the CD Drive (E:), expand NetKVM, expand w11, select amd64, and click OK.
-![[win-kvm-images/27-install-windows-11-virtual-machine-on-kvm-install-netkvm-driver.webp]]
+![install-netkvm-driver](win-kvm-images/27-install-windows-11-virtual-machine-on-kvm-install-netkvm-driver.webp)
 
 After installing the VirtIO network device driver, click the Next button to proceed with the installation.
-![[win-kvm-images/28-install-windows-11-virtual-machine-on-kvm-install-start.webp]]
+![install-start](win-kvm-images/28-install-windows-11-virtual-machine-on-kvm-install-start.webp)
 
 The next installation steps are all about personalization. Complete the installation according to your needs, and you will be taken to the desktop environment once it is finished.
-![[win-kvm-images/29-install-windows-11-virtual-machine-on-kvm-install-windows-desktop.webp]]
+![install-windows-desktop](win-kvm-images/29-install-windows-11-virtual-machine-on-kvm-install-windows-desktop.webp)
 
 Finally, you must install VirtIO Windows Guest Tools. This package includes some optional drivers and services that will boost SPICE performance and integration. This includes the QXL video driver as well as the SPICE guest agent for copy and paste, automatic resolution switching, and other features.
 
 So launch **Windows Explorer**, navigate to the **CD Drive (E:)**, and double-click the **virtio-win-guest-tools** package to install it.
-![[win-kvm-images/30-install-windows-11-virtual-machine-on-kvm-install-guest-tools.webp]]
+![install-guest-tools](win-kvm-images/30-install-windows-11-virtual-machine-on-kvm-install-guest-tools.webp)
 
 After installing the guest tools, on the Windows-11 KVM window, click View, Scale Display, and check the 'Auto resize VM with window' option. This will enable the Windows 11 guest window to automatically resize as you scale it.
-![[win-kvm-images/31-install-windows-11-virtual-machine-on-kvm-install-auto-resize.webp]]
+![install-auto-resize](win-kvm-images/31-install-windows-11-virtual-machine-on-kvm-install-auto-resize.webp)
 
 The Windows 11 operating system installation is now complete. Shut down the Windows 11 virtual machine.
 
 Now that you've installed guest tools, you don't need the second CDROM drive. Click the lightbulb icon to access the hardware details. Unmount the virtio-win.iso image and then remove the second CDROM drive.
-![[win-kvm-images/32-install-windows-11-virtual-machine-on-kvm-remove-cdrom-2.webp]]
+![remove-cdrom-2](win-kvm-images/32-install-windows-11-virtual-machine-on-kvm-remove-cdrom-2.webp)
 
 Unmount the ISO image of the Windows 11 installer from the first CDROM drive as well.
 
-![[win-kvm-images/33-install-windows-11-virtual-machine-on-kvm-unmount-iso.webp]]
+![unmount-iso](win-kvm-images/33-install-windows-11-virtual-machine-on-kvm-unmount-iso.webp)
 ## 3. Enable Hardware Security on Windows 11
 
 With the Q35 chipset selected, Secure Boot and TPM 2.0 enabled, and the latest WHQL-certified VirtIO drivers installed, your Windows 11 guest virtual machine already has standard security.
@@ -315,7 +315,7 @@ With the Q35 chipset selected, Secure Boot and TPM 2.0 enabled, and the latest W
 You can check if your VM passes standard security by opening the Device Security page.
 
 To access the Device Security page, navigate to Settings > Privacy & Security > Windows Security > Device Security.
-![[win-kvm-images/34-install-windows-11-virtual-machine-on-kvm-standard-security.webp]]
+![standard-security](win-kvm-images/34-install-windows-11-virtual-machine-on-kvm-standard-security.webp)
 
 To make Windows 11 even more secure, you can enable Core Isolation.
 
@@ -342,17 +342,17 @@ With this:
 ```
 
 If you're using AMD CPUs, replace **vmx** with the **svm** policy flag.
-![[win-kvm-images/35-install-windows-11-virtual-machine-on-kvm-enable-vmx.webp]]
+![enable-vmx](win-kvm-images/35-install-windows-11-virtual-machine-on-kvm-enable-vmx.webp)
 
 Start your Windows 11 guest virtual machine and navigate to the Core isolation details page.
 
 To access the Core isolation details page, navigate to Settings > Privacy & Security > Windows Security > Device Security > Core isolation details.
 
 Toggle the Memory Integrity switch to enable it. When prompted, restart the Windows 11 VM.
-![[win-kvm-images/36-install-windows-11-virtual-machine-on-kvm-toggle-memory.webp]]
+![toggle-memory](win-kvm-images/36-install-windows-11-virtual-machine-on-kvm-toggle-memory.webp)
 
 After the reboot, check the security level of your device once more. Go to the Device Security page by navigating to Settings > Privacy & Security > Windows Security > Device Security.
-![[win-kvm-images/37-install-windows-11-virtual-machine-on-kvm-enhanced-security.webp]]
+![enhanced-security](win-kvm-images/37-install-windows-11-virtual-machine-on-kvm-enhanced-security.webp)
 
 You now have a Windows 11 guest virtual machine running with enhanced hardware security.
 ## 4. Optimize Windows 11 Performance
@@ -367,7 +367,7 @@ SuperFetch, also known as SysMain, is a standard Windows feature that preloads t
 To disable Superfetch, type services into the search box and press [Enter] to open the Services window.
 
 In the Services window, look for SysMain. Right-click it and select Properties. Then disable the service.
-![[win-kvm-images/38-install-windows-11-virtual-machine-on-kvm-disable-superfetch.webp]]
+![disable-superfetch](win-kvm-images/38-install-windows-11-virtual-machine-on-kvm-disable-superfetch.webp)
 ### 4.2. Disable Windows Web Search
 
 When you search for something in the Windows Search box or Start menu, you may have to wait a few seconds as Windows retrieves your search results along with a list of suggested web results from Bing. Although this is a useful feature, you may dislike it and wish to disable it.
@@ -380,7 +380,7 @@ To disable web results on Windows 11, follow these steps:
     Now, right-click on the newly created Explorer key, select New, and then the DWORD (32-bit) Value option. Name the DWORD DisableSearchBoxSuggestions and press [Enter].
     Double-click the newly created DWORD DisableSearchBoxSuggestions and change its value from 0 to 1.
 
-![[win-kvm-images/39-install-windows-11-virtual-machine-on-kvm-disable-web-search.webp]]
+![disable-web-search](win-kvm-images/39-install-windows-11-virtual-machine-on-kvm-disable-web-search.webp)
 
 Close the Registry Editor window and restart your computer. You will now have fast-loading search results that do not retrieve results from the web.
 ### 4.3. Disable useplatformclock
@@ -428,16 +428,16 @@ TaskPath                    TaskName         State
 Some programs start automatically and run in the background when you turn on your computer. You can disable these programs so that they do not start when your computer boots.
 
 To stop a program from starting automatically, navigate to Settings > Apps > Startup. Then, turn off all programs that you don't need or use frequently.
-![[win-kvm-images/40-install-windows-11-virtual-machine-on-kvm-disable-auto-start.webp]]
+![disable-auto-start](win-kvm-images/40-install-windows-11-virtual-machine-on-kvm-disable-auto-start.webp)
 ### 4.6. Adjust the Visual Effects in Windows 11
 
 Many visual effects, such as animations and shadow effects, are included in Windows 11. These are visually appealing, but they can consume additional system resources and slow down your computer.
 
 To disable visual effects in Windows, first type performance in the Search box, then select Adjust the appearance and performance of Windows from the list of results.
-![[win-kvm-images/41-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp]]
+![disable-animation-1](win-kvm-images/41-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp)
 
 On the Visual Effects tab, select Adjust for best performance > Apply.
-![[win-kvm-images/42-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp]]
+![disable-animation-1](win-kvm-images/42-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp)
 
 The process of properly installing a Windows 11 Virtual Machine on KVM has now been completed.
 ## 5. Conclusion
