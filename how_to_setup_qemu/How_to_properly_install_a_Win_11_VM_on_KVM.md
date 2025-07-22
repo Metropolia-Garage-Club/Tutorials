@@ -89,6 +89,7 @@ Go to **Edit > Preferences** and **Enable XML editing**.
 ![enable-xml-editing](win-kvm-images/02-install-windows-11-virtual-machine-on-kvm-enable-xml-editing.webp)
 
 After that, click the computer icon in the upper left corner.
+
 ![start-wizard](win-kvm-images/03-install-windows-11-virtual-machine-on-kvm-start-wizard.webp)
 
 This will launch a wizard that will guide you through the process of creating a new virtual machine in five easy steps.
@@ -121,6 +122,7 @@ Set the disk image size for the virtual machine. The disk image that is created 
 This is the final configuration screen of the Virtual Machine Creation Wizard. Give the guest virtual machine a name. I'll set it to 'Windows-11', but you can change it to anything you want.
 
 Also, ensure that the 'Customize configuration before install' checkbox is selected. Click the Finish button to finish the wizard and proceed to the advanced options.
+
 ![wizard-step5](win-kvm-images/08-install-windows-11-virtual-machine-on-kvm-wizard-step5.webp)
 
 You will now be in the advanced options window.
@@ -247,6 +249,7 @@ Click the Add Hardware button to open the Add New Virtual Hardware window, and s
 ### 1.10. Enable Trusted Platform Module (TPM)
 
 Enable the Trusted Platform Module (TPM). TPM technology is designed to provide hardware-based, security-related functions. Windows 11 requires TPM version 2.0.
+
 ![adv-tpm](win-kvm-images/17-install-windows-11-virtual-machine-on-kvm-adv-tpm.webp)
 
 All of the virtual hardware and settings needed to install Microsoft Windows 11 have been configured. To begin the installation of Windows 11, click the 'Begin Installation' button in the upper left corner of the window.
@@ -352,6 +355,7 @@ Toggle the Memory Integrity switch to enable it. When prompted, restart the Wind
 ![toggle-memory](win-kvm-images/36-install-windows-11-virtual-machine-on-kvm-toggle-memory.webp)
 
 After the reboot, check the security level of your device once more. Go to the Device Security page by navigating to Settings > Privacy & Security > Windows Security > Device Security.
+
 ![enhanced-security](win-kvm-images/37-install-windows-11-virtual-machine-on-kvm-enhanced-security.webp)
 
 You now have a Windows 11 guest virtual machine running with enhanced hardware security.
@@ -428,7 +432,9 @@ TaskPath                    TaskName         State
 Some programs start automatically and run in the background when you turn on your computer. You can disable these programs so that they do not start when your computer boots.
 
 To stop a program from starting automatically, navigate to Settings > Apps > Startup. Then, turn off all programs that you don't need or use frequently.
+
 ![disable-auto-start](win-kvm-images/40-install-windows-11-virtual-machine-on-kvm-disable-auto-start.webp)
+
 ### 4.6. Adjust the Visual Effects in Windows 11
 
 Many visual effects, such as animations and shadow effects, are included in Windows 11. These are visually appealing, but they can consume additional system resources and slow down your computer.
@@ -437,6 +443,7 @@ To disable visual effects in Windows, first type performance in the Search box, 
 ![disable-animation-1](win-kvm-images/41-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp)
 
 On the Visual Effects tab, select Adjust for best performance > Apply.
+
 ![disable-animation-1](win-kvm-images/42-install-windows-11-virtual-machine-on-kvm-disable-animation-1.webp)
 
 The process of properly installing a Windows 11 Virtual Machine on KVM has now been completed.
