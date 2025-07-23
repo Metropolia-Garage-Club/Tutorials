@@ -1,7 +1,15 @@
-## Garage sudoers config
+## Garage sudoers config for elevated user privileges without full sudo access
+
+## To include this file in the machine sudoers file, make sure this file is in the directory /etc/sudoers.d/
+## then edit the /etc/sudoers file with visduo: sudo visudo
+## and add this line at the end of it: @include /etc/sudoers.d/[name of this file]
+## (if @includedir /etc/sudoers.d/ is already in use, it is not necessary to explicitly include this file
+
+## Enable insults on wrong sudo password
 Defaults insults
 
 ## User aliases
+## Add users and / or groups, which should get the permission defined in this file
 User_Alias GARAGE = aiot-garage
 
 ## Command aliases
@@ -13,6 +21,14 @@ Cmnd_alias    PROCESS = /usr/bin/nice, /usr/bin/kill, /usr/bin/renice, \
 Cmnd_alias    REBOOT = /sbin/halt, /sbin/reboot, /sbin/poweroff, /sbin/shutdown
 
 Cmnd_alias    FILE_OP = /bin/vi, /bin/vim, /bin/nvim, /bin/nano, \
-                        /bin/cp, /bin/mv, /bin/
+                        /bin/cp, /bin/mv, /bin/rm
 
 Cmnd_alias    CONTAINERS = /bin/docker, /bin/podman, /bin/kubectl
+
+Cmnd_alias    PKGMAN = /usr/bin/apt, /usr/bin/dpkg, /usr/bin/nala
+
+##
+## User / group privilege specification
+##
+
+GARAGE root=(garage:garage) NOPASSWD: REBOOT

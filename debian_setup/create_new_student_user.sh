@@ -18,6 +18,9 @@ fi
 ## Define common variables and paths used for the script
 ACTIVE_USER_HOME="/home/${USER}"
 SKEL_PATH="$ACTIVE_USER_HOME/Documents/Guides/Tutorials/debian_setup/skel"
+
+## Dialout is the Ubuntu default group who owns /dev/ttyS* devices (serial terminals).
+## Being part of that group allows you to communicate with other devices (i.e. microcontrollers) via a serial port
 GROUPS_ARRAY=("users" "dialout" "garage")
 GROUPS_LIST=$(IFS=, ; echo "${GROUPS_ARRAY[*]}")
 TEST=true
