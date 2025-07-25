@@ -165,7 +165,7 @@ sudo $PKGER install nvtop -y
 }
 
 # Terminal emulators
-install_terminal_emulators()
+install_shells_and_terminal_emulators()
 {
 sudo $PKGER install fish -y
 
@@ -216,10 +216,13 @@ if pgrep -x "gnome-shell" > /dev/null; then
 fi
 
 # miniconda
-if ! command -v conda >/dev/null 2>&1; then
-    mkdir -p ~/miniconda3
-    wget -P ~/miniconda3 "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+local miniconda_install=true
+if $miniconda_install == "true"; then
+    if ! command -v conda >/dev/null 2>&1; then
+        mkdir -p ~/miniconda3
+        wget -P ~/miniconda3 "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+        bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+    fi
 fi
 
 # sudo $PKGER install npm -y
@@ -229,11 +232,15 @@ fi
 ## Dev Tools
 install_dev_tools()
 {
-    # add user to dialout (debian) or uucp (arch) group to be able to communicate with microcontrollers
-if [[ "$ID" == "arch" ]]; then
-    sudo usermod -aG uucp $USER
-else
-    sudo usermod -aG dialout $USER
+# add user to dialout (debian) or uucp (arch) group to be able to communicate with microcontrollers
+# via serial port
+local allow_user_serial_comm=true
+if $allow_user_serial_comm == "true"; then
+    if "$ID" == "arch"; then
+        sudo usermod -aG uucp $USER
+    else
+        sudo usermod -aG dialout $USER
+    fi
 fi
 
 sudo $PKGER install tealdeer -y; tldr --update
@@ -256,70 +263,78 @@ local repo_path="arduino/arduino-ide"
 ARDUINO_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
 ARDUINO_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ARDUINO_LATEST_TAG/arduino-ide_${ARDUINO_LATEST_TAG}_Linux_64bit.AppImage"
 
-if ! ls ~/AppImages/arduino-ide_*.AppImage 1>/dev/null 2>&1; then
-    mkdir -p ~/AppImages
-    wget -O ~/AppImages/ $ARDUINO_DOWNLOAD_URL
-    chmod +x ~/AppImages/arduino-ide_*.AppImage
+local arduino_install=true
+if $arduino_install == "true"; then
+    if ! ls ~/AppImages/arduino-ide_*.AppImage 1>/dev/null 2>&1; then
+        mkdir -p ~/AppImages
+        wget -O ~/AppImages/ $ARDUINO_DOWNLOAD_URL
+        chmod +x ~/AppImages/arduino-ide_*.AppImage
+    fi
 fi
+
 # QEMU KVM
 # sudo $PKGER install qemu-full -y
 
 # VS Code
-if [[ $ID == "ubuntu" || $ID == "debian" || $ID == "linuxmint" || $ID == "pop" ]]; then
-    case "$PROCESSOR_ARCH" in
-        x86_64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64";
-        sudo $PKGER install ~/Downloads/vscode.deb
-        ;;
-        arm64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64";
-        sudo $PKGER install ~/Downloads/vscode.deb
-        ;;
-        *) echo -e "$RED Unknown processor architecture"
-        ;;
-    esac
+local vs_code_install=true
+if [[ $vs_code_install == "true" ]]; then
+    if [[ $ID == "ubuntu" || $ID == "debian" || $ID == "linuxmint" || $ID == "pop" ]]; then
+        case "$PROCESSOR_ARCH" in
+            x86_64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64";
+            sudo $PKGER install ~/Downloads/vscode.deb
+            ;;
+            arm64) wget -O ~/Downloads/vscode.deb "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64";
+            sudo $PKGER install ~/Downloads/vscode.deb
+            ;;
+            *) echo -e "$RED Unknown processor architecture"
+            ;;
+        esac
+    fi
 fi
-
 }
 
 install_container_tools()
 {
 # Docker
-if ! command -v docker >/dev/null 2>&1; then
-    case "$ID" in
-        "arch") ;;
+local docker_install=true
+if $docker_install == "true"; then
+    if ! command -v docker >/dev/null 2>&1; then
+        case "$ID" in
+            "arch") ;;
 
-        "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings && \
-                sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
-                sudo chmod a+r /etc/apt/keyrings/docker.asc && \
-                echo \
-                  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-                  ${UBUNTU_CODENAME:-$VERSION_CODENAME} stable" | \
-                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-                sudo $PKGER update && \
-                sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-            ;;
+            "ubuntu") sudo install -m 0755 -d /etc/apt/keyrings && \
+                    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
+                    sudo chmod a+r /etc/apt/keyrings/docker.asc && \
+                    echo \
+                      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+                      ${UBUNTU_CODENAME:-$VERSION_CODENAME} stable" | \
+                      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+                    sudo $PKGER update && \
+                    sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+                ;;
 
-        "debian") sudo install -m 0755 -d /etc/apt/keyrings && \
-                sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
-                sudo chmod a+r /etc/apt/keyrings/docker.asc && \
-                echo \
-                  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
-                  $VERSION_CODENAME stable" | \
-                  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-                sudo $PKGER update && \
-                sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-            ;;
-    esac
+            "debian") sudo install -m 0755 -d /etc/apt/keyrings && \
+                    sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
+                    sudo chmod a+r /etc/apt/keyrings/docker.asc && \
+                    echo \
+                      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+                      $VERSION_CODENAME stable" | \
+                      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+                    sudo $PKGER update && \
+                    sudo $PKGER install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+                ;;
+        esac
+    fi
 fi
 
 # Kubernetes
 
 # Podman
-pod_install=true
+local pod_install=true
 if $pod_install; then
     if ! command -v podman >/dev/null 2>&1; then
         sudo $PKGER install podman podman-compose -y
     fi
-    }
 fi
 }
 ## Robot Simulation
@@ -332,44 +347,50 @@ install_robot_simulation()
 ISAAC_SIM_DL_4_2="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.2.0-rc.18%2Brelease.16044.3b2ed111.gl.linux-x86_64.release.zip"
 ISAAC_SIM_DL_4_5="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-comp-check%404.5.0-rc.6%2Brelease.675.f1cca148.gl.linux-x86_64.release.zip"
 ISAAC_SIM_DL_5_0=""
+local install_isaac_sim=true
+if $install_isaac_sim == "true"; then
+    echo -e "\nAvailable IsaacSim versions are: $YELLOW
+    1) 4.2
+    2) 4.5
+    3) 5.0 (in beta as of 7/2025) $NC"
+    read -p "Select which version of IsaacSim to install (1 - 3): " isaac_sim_version
 
-echo -e "\nAvailable IsaacSim versions are: $YELLOW
-1) 4.2
-2) 4.5
-3) 5.0 (in beta as of 7/2025) $NC"
-read -p "Select which version of IsaacSim to install (1 - 3): " isaac_sim_version
+    mkdir -p ~/isaacsim
+    cd ~/isaacsim
 
-mkdir -p ~/isaacsim
-cd ~/isaacsim
+    case "$isaac_sim_version" in
+        1 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_2
+            unzip "~/isaacsim/isaac-sim-*.zip"
+            ./omni.isaac.sim.post.install.sh
+            cd
+            ;;
 
-case "$isaac_sim_version" in
-    1 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_2
-        unzip "~/isaacsim/isaac-sim-*.zip"
-        ./omni.isaac.sim.post.install.sh
-        cd
-        ;;
-
-    2 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_5
-        unzip "~/isaacsim/isaac-sim-*.zip"
-        ./post_install
-        cd
-        ;;
-    3 ) wget -P ~/isaacsim $ISAAC_SIM_DL_5_0
-        unzip "~/isaacsim/isaac-sim-*.zip"
-        ./post_install
-        cd
-        ;;
-    * ) echo -e "$RED Unknown IsaacSim version $isaac_sim_version $NC"
-esac
-
-# IsaacLab
-if command -v nvcc >/dev/null 2>&1; then
-CUDA_VERSION=$(nvcc --version | grep -oP 'release \K[0-9]+\.[0-9]+')
-else
-    CUDA_VERSION=" "
-    echo -e "$RED Cuda not found!$NC"
+        2 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_5
+            unzip "~/isaacsim/isaac-sim-*.zip"
+            ./post_install
+            cd
+            ;;
+        3 ) wget -P ~/isaacsim $ISAAC_SIM_DL_5_0
+            unzip "~/isaacsim/isaac-sim-*.zip"
+            ./post_install
+            cd
+            ;;
+        * ) echo -e "$RED Unknown IsaacSim version $isaac_sim_version $NC"
+    esac
 fi
-mkdir -p ~/IsaacLab
+
+# IsaacLab WIP
+local install_isaac_lab=false
+if $install_isaac_lab == "true"; then
+    if command -v nvcc >/dev/null 2>&1; then
+    CUDA_VERSION=$(nvcc --version | grep -oP 'release \K[0-9]+\.[0-9]+')
+    else
+        CUDA_VERSION=" "
+        echo -e "$RED Cuda not found!$NC"
+    fi
+    mkdir -p ~/IsaacLab
+
+fi
 
 # Unity
 # sudo $PKGER install unity -y
@@ -380,8 +401,8 @@ return
 ## CAD Software
 install_cad_software ()
 {
-flatpak install --from https://flathub.org/repo/appstream/org.kicad.KiCad.flatpakref -y
-# sudo $PKGER install kicad kicad-packages3d -y     # version in ubuntu/debian repos is quite old
+flatpak install --user --from https://flathub.org/repo/appstream/org.kicad.KiCad.flatpakref -y
+# sudo $PKGER install kicad kicad-packages3d -y     # version in ubuntu/debian repos is quite old, use flatpak
 sudo flatpak install --user org.freecad.FreeCAD -y #appimg or flatpak
 sudo $PKGER install octave -y
 # sudo $PKGER install blender -y
@@ -394,11 +415,16 @@ install_3d_printing ()
 local repo_path="SoftFever/OrcaSlicer"
 ORCA_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
 ORCA_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ORCA_LATEST_TAG/OrcaSlicer_Linux_AppImage_$ORCA_LATEST_TAG.AppImage"
-if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
-    mkdir -p ~/AppImages
-    wget -P ~/AppImages/ "$ORCA_DOWNLOAD_URL"
-    chmod +x ~/AppImages/OrcaSlicer_*.AppImage
+
+local orca_install=true
+if $orca_install == "true"; then
+    if ! ls ~/AppImages/OrcaSlicer_*.AppImage 1>/dev/null 2>&1; then
+        mkdir -p ~/AppImages
+        wget -P ~/AppImages/ "$ORCA_DOWNLOAD_URL"
+        chmod +x ~/AppImages/OrcaSlicer_*.AppImage
+    fi
 fi
+
 # flatpak install --user io.mango3d.LycheeSlicer -y
 # flatpak install --user com.prusa3d.PrusaSlicer -y
 # flatpak install --user com.ultimaker.cura -y
@@ -411,33 +437,39 @@ install_system_utils()
 sudo $PKGER install libfuse2 -y
 sudo $PKGER install timeshift -y
 sudo $PKGER install curl -y
+
+## Ubuntu LTS kernel
+local install_ubuntu_general_kernel=false
+if $install_ubuntu_general_kernel == "true"; then
+    if $ID == "ubuntu"; then
+        sudo apt install --install-recommends linux-generic
+    fi
+fi
 }
 
 # Flatpaks
 install_flatpaks()
 {
-if command -v flatpak >/dev/null 2>&1
-then
-flatpak install --user com.obsproject.Studio -y  #Official obs pkg
-flatpak install --user com.github.tchx84.Flatseal -y #Flatpak pkg permissions manager
-flatpak install --user eu.stethewwolf.gresistor -y #GUI for checking THT resistor colour codes
-flatpak install --user com.moonlight_stream.Moonlight -y
-# flatpak install --user com.usebottles.bottles -y
-# flatpak install --user us.zoom.Zoom -y
-# flatpak install --user com.discordapp.Discord -y
-# flatpak install --user org.upscayl.Upscayl
+if command -v flatpak >/dev/null 2>&1; then
+    flatpak install --user com.obsproject.Studio -y  #Official obs pkg
+    flatpak install --user com.github.tchx84.Flatseal -y #Flatpak pkg permissions manager
+    flatpak install --user eu.stethewwolf.gresistor -y #GUI for checking THT resistor colour codes
+    flatpak install --user com.moonlight_stream.Moonlight -y
+    # flatpak install --user com.usebottles.bottles -y
+    # flatpak install --user us.zoom.Zoom -y
+    # flatpak install --user com.discordapp.Discord -y
+    # flatpak install --user org.upscayl.Upscayl
 fi
 }
 
 # Snap packages
 install_snaps()
 {
-if command -v snap >/dev/null 2>&1
-then
-#     sudo snap install --classic code
+if command -v snap >/dev/null 2>&1; then
+    echo -e "$RED Are you sure you want to install $BLUE Snap packages? $NC"
 #     sudo snap install --classic google-cloud-cli
 #     echo -e "$BLUE vs code $NC installed through $BLUE Snap $NC"
-    echo -e "$RED Are you sure you want to install $BLUE Snap packages? $NC"
+
 else
     echo -e "$BLUE Snap $RED not available, $NC skipping $BLUE Snap packages... $NC"
 fi
@@ -449,7 +481,7 @@ fi
 echo -e "\nAvailable package lists: $YELLOW
  0) All
  1) Resource Monitors (nvtop, btop)
- 2) Terminal Emulators (fish)
+ 2) Shells Terminal Emulators (fish)
  3) File Managers (yazi, dolphin, nautilus)
  4) Document Viewers (gimp, libreoffice, VLC, audacity)
  5) Package Managers (flatpak, gnome-software, miniconda, gnome-shell-extension-manager)
@@ -459,7 +491,7 @@ echo -e "\nAvailable package lists: $YELLOW
  9) CAD (kicad, freecad)
  10) 3D Printing (OrcaSlicer, LycheeSlicer, PrusaSlicer, Cura, BambuStudio)
  11) Flatpaks (OBS, Flatseal, gResistor)
- 12) Snap packages (gcloud-cli, vscode)
+ 12) Snap packages (gcloud-cli)
  13) System Utils (timeshift, libfuse2) \n $NC"
 read -p "Select what category of packages to install (0 - 13): " pkglist
 
@@ -467,12 +499,12 @@ read -p "Select what category of packages to install (0 - 13): " pkglist
 # !! PKGS installation start !!
 ###############################
 case "$pkglist" in
-    0 ) install_system_utils; install_resource_monitors; install_terminal_emulators; \
+    0 ) install_system_utils; install_resource_monitors; install_shells_and_terminal_emulators; \
         install_file_managers; install_document_viewers; install_package_managers; \
         install_dev_tools; install_container_tools; install_robot_simulation; \
         install_cad_software; install_3d_printing; install_flatpaks; install_snaps;;
     1 ) install_resource_monitors ;;
-    2 ) install_terminal_emulators ;;
+    2 ) install_shells_and_terminal_emulators ;;
     3 ) install_file_managers ;;
     4 ) install_document_viewers ;;
     5 ) install_package_managers ;;
