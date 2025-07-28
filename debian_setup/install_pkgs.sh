@@ -251,6 +251,7 @@ sudo $PKGER install jq -y
 sudo $PKGER install tesseract-ocr-eng tesseract-ocr-fin -y
 sudo $PKGER install nvidia-cuda-toolkit nvidia-cuda-samples -y
 sudo $PKGER install fzf -y
+sudo $PKGER install usbutils pv -y
 # sudo $PKGER install arduino -y
 # sudo $PKGER install github-desktop -y
 # sudo $PKGER install docker-desktop -y
@@ -328,10 +329,23 @@ if $docker_install == "true"; then
 fi
 
 # Kubernetes
+local kube_install=true
+if $kube_install == "true"; then
+    if command -v kubectl >/dev/null 2>&1; then
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://pkgs.k8s.io/core:/latest:/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
+
+        sudo nala update
+        sudo nala install kubectl -y
+    fi
+fi
 
 # Podman
 local pod_install=true
-if $pod_install; then
+if $pod_install == "true"; then
     if ! command -v podman >/dev/null 2>&1; then
         sudo $PKGER install podman podman-compose -y
     fi
