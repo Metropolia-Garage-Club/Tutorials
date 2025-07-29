@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Defining colour variables for colourful output
+## Defining colour variables for colourful output
 NC='\033[0m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -8,18 +8,18 @@ BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 YELLOW='\033[1;33m'
 
-# Check not running as root
+## Check not running as root
 if [ "$EUID" == 0 ]
     then echo -e "$RED Running as root..."
          echo -e " Run the script as a regular user $NC"
     exit
 fi
 
-# source os-release to get distro information
+## source os-release to get distro information
 source /etc/os-release
 PROCESSOR_ARCH=$(uname -m)
 
-# Checking Package Manager
+## Checking Package Manager
 if command -v nala >/dev/null 2>&1
 then
     PKGER=nala
@@ -49,7 +49,7 @@ fi
 
 case "$PKGER" in
     apt|nala) echo -e "Using a $BLUE Debian $NC based system with packager: " $BLUE $PKGER $NC
-            # if apt is the current $PKGER, offer to switch to using nala
+            ## if apt is the current $PKGER, offer to switch to using nala
             if [[ "$PKGER" == "apt" ]]; then
                 if command -v nala >/dev/null 2>&1; then
                     read -p "Nala is available. Use nala instead of apt? [Y]/[n] " yn1
@@ -71,7 +71,7 @@ case "$PKGER" in
             ;;
 
     pacman|yay|paru) echo -e "Using an $BLUE Arch $NC based system with packager: " $BLUE $PKGER $NC
-            # if pacman is the current $PKGER, offer to switch to yay / paru (AUR Helper)
+            ## if pacman is the current $PKGER, offer to switch to yay / paru (AUR Helper)
             if [[ "$PKGER" == "pacman" ]]; then
                 if command -v yay >/dev/null 2>&1; then
                     read -p "Yay is available. Use yay instead of pacman? [Y]/[n] " yn3
@@ -88,11 +88,11 @@ case "$PKGER" in
                         *) PKGER=paru ;;
                     esac
                 else
-                    # Neither yay nor paru available - offer to install yay, then offer paru
+                    ## Neither yay nor paru available - offer to install yay, then offer paru
                     read -p "Do you want to install yay (AUR helper) as system Package Manager? [Y]/[n] " yn5
                     case "$yn5" in
                         [Yy]*)
-                            # Install yay
+                            ## Install yay
                             sudo pacman -S --needed git base-devel --noconfirm
                             cd /tmp
                             git clone https://aur.archlinux.org/yay.git
@@ -103,11 +103,11 @@ case "$PKGER" in
                             ;;
 
                         [Nn]*)
-                            # User declined yay, offer paru
+                            ## User declined yay, offer paru
                             read -p "Do you want to install paru (AUR helper) as system Package Manager instead? [Y]/[n] " yn6
                             case "$yn6" in
                                 [Yy]*)
-                                    # Install paru
+                                    ## Install paru
                                     sudo pacman -S --needed git base-devel --noconfirm
                                     cd /tmp
                                     git clone https://aur.archlinux.org/paru.git
@@ -119,7 +119,7 @@ case "$PKGER" in
 
                                 [Nn]*) echo -e "Continuing with pacman (some AUR packages may not be available)" ;;
                                 *)
-                                    # Default to installing paru
+                                    ## Default to installing paru
                                     sudo pacman -S --needed git base-devel --noconfirm
                                     cd /tmp
                                     git clone https://aur.archlinux.org/paru.git
@@ -131,7 +131,7 @@ case "$PKGER" in
                         esac
                         ;;
                     *)
-                        # Default to installing yay
+                        ## Default to installing yay
                         sudo pacman -S --needed git base-devel --noconfirm
                         cd /tmp
                         git clone https://aur.archlinux.org/yay.git
@@ -148,15 +148,15 @@ case "$PKGER" in
         exit 1 ;;
 esac
 
-# function to find the latest version number of a GitHub release
-# example use: $repo_path=arduino/arduino-ide
+## function to find the latest version number of a GitHub release
+## example use: $repo_path=arduino/arduino-ide
 get_github_latest_release_tag()
 {
 local repo_path="$1"
 curl -s "https://api.github.com/repos/$repo_path/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-# resource monitors
+## resource monitors
 install_resource_monitors()
 {
 sudo $PKGER install btop -y
@@ -164,7 +164,7 @@ sudo $PKGER install nvtop -y
 # sudo $PKGER install wireshark -y
 }
 
-# Terminal emulators
+## Terminal emulators
 install_shells_and_terminal_emulators()
 {
 sudo $PKGER install fish -y
@@ -175,7 +175,7 @@ sudo $PKGER install fish -y
 # sudo $PKGER install foot -y
 }
 
-# File Managers
+## File Managers
 install_file_managers()
 {
 # sudo $PKGER install dolphin -y
@@ -186,7 +186,7 @@ install_file_managers()
 return
 }
 
-# Document Viewers
+## Document Viewers
 install_document_viewers()
 {
 sudo $PKGER install gimp -y
@@ -197,25 +197,24 @@ sudo $PKGER install audacity -y
 # sudo $PKGER install zathura -y
 }
 
-# Developer
 ## Package Managers
 install_package_managers ()
 {
-# Flatpak
+## Flatpak
 sudo $PKGER install flatpak -y
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-# Snap
+## Snap
 # sudo $PKGER install snap -y
 
-# gnome-software && gnome-shell-extension-manager
+## gnome-software && gnome-shell-extension-manager
 if pgrep -x "gnome-shell" > /dev/null; then
     sudo $PKGER install gnome-software gnome-software-plugin-flatpak -y
     sudo $PKGER install gnome-shell-extension-manager -y
 fi
 
-# miniconda
+## miniconda
 local miniconda_install=true
 if $miniconda_install == "true"; then
     if ! command -v conda >/dev/null 2>&1; then
@@ -232,8 +231,8 @@ fi
 ## Dev Tools
 install_dev_tools()
 {
-# add user to dialout (debian) or uucp (arch) group to be able to communicate with microcontrollers
-# via serial port
+## add user to dialout (debian) or uucp (arch) group to be able to
+## communicate with microcontrollers via serial port
 local allow_user_serial_comm=true
 if $allow_user_serial_comm == "true"; then
     if "$ID" == "arch"; then
@@ -259,7 +258,7 @@ sudo $PKGER install usbutils pv -y
 # sudo $PKGER install netbird -y
 # sudo $PKGER install wine -y
 
-# Arduino IDE
+## Arduino IDE
 local repo_path="arduino/arduino-ide"
 ARDUINO_LATEST_TAG=$(get_github_latest_release_tag "$repo_path")
 ARDUINO_DOWNLOAD_URL="https://github.com/$repo_path/releases/download/$ARDUINO_LATEST_TAG/arduino-ide_${ARDUINO_LATEST_TAG}_Linux_64bit.AppImage"
@@ -273,10 +272,12 @@ if $arduino_install == "true"; then
     fi
 fi
 
-# QEMU KVM
+## QEMU KVM
+local qemu_install=true
+if [[ $qemu_install == "true" ]]; then
 # sudo $PKGER install qemu-full -y
 
-# VS Code
+## VS Code
 local vs_code_install=true
 if [[ $vs_code_install == "true" ]]; then
     if [[ $ID == "ubuntu" || $ID == "debian" || $ID == "linuxmint" || $ID == "pop" ]]; then
@@ -296,7 +297,7 @@ fi
 
 install_container_tools()
 {
-# Docker
+## Docker
 local docker_install=true
 if $docker_install == "true"; then
     if ! command -v docker >/dev/null 2>&1; then
@@ -328,7 +329,7 @@ if $docker_install == "true"; then
     fi
 fi
 
-# Kubernetes
+## Kubernetes
 local kube_install=true
 if $kube_install == "true"; then
     if command -v kubectl >/dev/null 2>&1; then
@@ -338,8 +339,8 @@ if $kube_install == "true"; then
         echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
         sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
 
-        sudo nala update
-        sudo nala install kubectl -y
+        sudo $PKGER update
+        sudo $PKGER install kubectl -y
     fi
 fi
 
@@ -354,10 +355,10 @@ fi
 ## Robot Simulation
 install_robot_simulation()
 {
-# TODO: Add install scripts for isaaclab, ros2 && unity
+## TODO: Add install scripts for isaaclab, ros2 && unity
 # sudo $PKGER install ROS2 -y
 
-# isaacsim
+## isaacsim
 ISAAC_SIM_DL_4_2="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.2.0-rc.18%2Brelease.16044.3b2ed111.gl.linux-x86_64.release.zip"
 ISAAC_SIM_DL_4_5="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-comp-check%404.5.0-rc.6%2Brelease.675.f1cca148.gl.linux-x86_64.release.zip"
 ISAAC_SIM_DL_5_0=""
@@ -393,7 +394,7 @@ if $install_isaac_sim == "true"; then
     esac
 fi
 
-# IsaacLab WIP
+## IsaacLab WIP
 local install_isaac_lab=false
 if $install_isaac_lab == "true"; then
     if command -v nvcc >/dev/null 2>&1; then
@@ -406,7 +407,7 @@ if $install_isaac_lab == "true"; then
 
 fi
 
-# Unity
+## Unity
 # sudo $PKGER install unity -y
 # [drone_sim]
 return
@@ -445,12 +446,13 @@ fi
 # flatpak install --user com.bambulab.BambuStudio -y
 }
 
-# System Utils
+## System Utils
 install_system_utils()
 {
 sudo $PKGER install libfuse2 -y
 sudo $PKGER install timeshift -y
 sudo $PKGER install curl -y
+# sudo $PKGER install tuned -y
 
 ## Ubuntu LTS kernel
 local install_ubuntu_general_kernel=false
@@ -461,7 +463,7 @@ if $install_ubuntu_general_kernel == "true"; then
 fi
 }
 
-# Flatpaks
+## Flatpaks
 install_flatpaks()
 {
 if command -v flatpak >/dev/null 2>&1; then
@@ -476,7 +478,7 @@ if command -v flatpak >/dev/null 2>&1; then
 fi
 }
 
-# Snap packages
+## Snap packages
 install_snaps()
 {
 if command -v snap >/dev/null 2>&1; then
