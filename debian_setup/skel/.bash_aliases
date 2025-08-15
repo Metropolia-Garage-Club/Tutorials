@@ -33,8 +33,15 @@ alias isaacsim='"$HOME"/isaacsim/isaac-sim.selector.sh'
 alias isaaclab='"$HOME"/IsaacLab/isaaclab.sh'
 alias ip='ip -c'
 
+## Podman
+pod-networks() {
+    podman ps --format "{{.names}}" | xargs -I {} sh -c 'echo -n "{}: "; podman inspect {} --format "{{range \ $net, \$conf := .NetworkSettings.Networks}}{{\$net}} {{end}}"'
+}
 
-
+pod-autostart-service() {
+    read -p "Give the name of the container you wish to autostart: " CONTAINER
+    podman generate systemd --name "${CONTAINER}" > "$HOME/.config/systemd/user/container_${CONTAINER}.service"
+}
 # Archives
 alias tarnow='tar -acf'
 alias untar='-zxvf'
@@ -49,4 +56,4 @@ alias csnano='sudo "$EDITOR" /etc/nanorc'
 alias cnano="$EDITOR" "$HOME/.config/nano/nanorc"
 alias cyazi='"$EDITOR" "$HOME"/.config/yazi/yazi.toml'
 alias cpacman='sudo "$EDITOR" /etc/pacman.conf'
-alias sbash = 'source "$HOME"/.bashrc'
+alias sbash='source "$HOME"/.bashrc'
