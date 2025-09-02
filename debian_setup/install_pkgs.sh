@@ -273,9 +273,12 @@ if $arduino_install == "true"; then
 fi
 
 ## QEMU KVM
-local qemu_install=true
+# local qemu_install=true
 if [[ $qemu_install == "true" ]]; then
 # sudo $PKGER install qemu-full -y
+sudo $PKGER install qemu-system-x86 qemu-utils libvirt-daemon-system virtinst virt-manager ovmf swtpm guestfs-tools libosinfo-bin tuned -y
+
+fi
 
 ## VS Code
 local vs_code_install=true
