@@ -277,7 +277,6 @@ fi
 if [[ $qemu_install == "true" ]]; then
 # sudo $PKGER install qemu-full -y
 sudo $PKGER install qemu-system-x86 qemu-utils libvirt-daemon-system virtinst virt-manager ovmf swtpm guestfs-tools libosinfo-bin tuned -y
-
 fi
 
 ## VS Code
@@ -363,33 +362,33 @@ install_robot_simulation()
 
 ## isaacsim
 ISAAC_SIM_DL_4_2="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone%404.2.0-rc.18%2Brelease.16044.3b2ed111.gl.linux-x86_64.release.zip"
-ISAAC_SIM_DL_4_5="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-comp-check%404.5.0-rc.6%2Brelease.675.f1cca148.gl.linux-x86_64.release.zip"
-ISAAC_SIM_DL_5_0=""
+ISAAC_SIM_DL_4_5="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone-4.5.0-linux-x86_64.zip"
+ISAAC_SIM_DL_5_0="https://download.isaacsim.omniverse.nvidia.com/isaac-sim-standalone-5.0.0-linux-x86_64.zip"
 local install_isaac_sim=true
 if $install_isaac_sim == "true"; then
     echo -e "\nAvailable IsaacSim versions are: $YELLOW
     1) 4.2
     2) 4.5
-    3) 5.0 (in beta as of 7/2025) $NC"
+    3) 5.0 $NC"
     read -p "Select which version of IsaacSim to install (1 - 3): " isaac_sim_version
 
-    mkdir -p ~/isaacsim
-    cd ~/isaacsim
+    mkdir -p "$HOME/isaacsim"
+    cd "$HOME/isaacsim"
 
     case "$isaac_sim_version" in
-        1 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_2
-            unzip "~/isaacsim/isaac-sim-*.zip"
+        1 ) wget -P "$HOME/isaacsim $ISAAC_SIM_DL_4_2"
+            unzip "$HOME/isaacsim/isaac-sim-*.zip"
             ./omni.isaac.sim.post.install.sh
             cd
             ;;
 
-        2 ) wget -P ~/isaacsim $ISAAC_SIM_DL_4_5
-            unzip "~/isaacsim/isaac-sim-*.zip"
+        2 ) wget -P "$HOME/isaacsim $ISAAC_SIM_DL_4_5"
+            unzip "$HOME/isaacsim/isaac-sim-*.zip"
             ./post_install
             cd
             ;;
-        3 ) wget -P ~/isaacsim $ISAAC_SIM_DL_5_0
-            unzip "~/isaacsim/isaac-sim-*.zip"
+        3 ) wget -P "$HOME/isaacsim $ISAAC_SIM_DL_5_0"
+            unzip "$HOME/isaacsim/isaac-sim-*.zip"
             ./post_install
             cd
             ;;
