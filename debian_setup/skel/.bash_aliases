@@ -39,7 +39,11 @@ pod-networks() {
 }
 
 pod-autostart-service() {
-    read -p "Give the name of the container you wish to autostart: " CONTAINER
+    if [ -z $1 ]; then
+        echo "Usage: pod-autostart-service <container_name>"
+        return 1
+    fi
+    CONTAINER="$1"
     podman generate systemd --name "${CONTAINER}" > "$HOME/.config/systemd/user/container_${CONTAINER}.service"
 }
 # Archives
